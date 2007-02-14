@@ -1,0 +1,9 @@
+MANIFEST
+Makefile.PL
+lib/HTML/SiteTear.pm
+lib/HTML/SiteTear/Item.pm
+lib/HTML/SiteTear/PageFilter.pm
+lib/HTML/SiteTear/Root.pm
+lib/HTML/SiteTear/Page.pm
+lib/HTML/SiteTear/CSS.pm
+bin/sitetear
