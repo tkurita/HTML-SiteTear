@@ -8,7 +8,7 @@ use File::Basename;
 use File::Copy;
 use File::Path;
 use Cwd;
-#use Data::Dumper;
+use Data::Dumper;
 
 use base qw(Class::Accessor);
 HTML::SiteTear::Item->mk_accessors(qw(linkpath
@@ -307,10 +307,10 @@ Get and set name of a folder to store HTML files linked from $source_path. If $i
 
 =cut
 sub page_folder_name {
-	my ($self) = @_;
+	my $self =  shift @_;
+	
 	if (@_) {
-		$self->{'page_folder_name'} = shift @_;
-		return 1;
+		return $self->{'page_folder_name'} = shift @_;
 	}
 	
 	if (exists $self->{'page_folder_name'}) {
@@ -330,11 +330,10 @@ Get and set name of a folder to store not HTML files(javascript, image, CSS) lin
 
 =cut
 sub resource_folder_name {
-	my ($self) = @_;
+	my $self = shift @_;
 	
 	if (@_) {
-		$self->{'resource_folder_name'} = shift @_;
-		return 1;
+		return $self->{'resource_folder_name'} = shift @_;
 	}
 	
 	if (exists $self->{'resource_folder_name'}) {
