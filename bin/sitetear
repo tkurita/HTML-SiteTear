@@ -8,7 +8,7 @@ use Pod::Usage;
 
 use HTML::SiteTear;
 
-our $VERSION = '1.2.1';
+our $VERSION = '1.3';
 
 {
 	my $man = 0;
@@ -30,13 +30,13 @@ our $VERSION = '1.2.1';
 			  -exitstatus => 1, -verbose => 1)
 	}
 
-	my ($sourcePath, $targetPath) = @ARGV;
+	my ($source_path, $target_path) = @ARGV;
 
-	my $siteTear = HTML::SiteTear->new($sourcePath);
+	my $siteTear = HTML::SiteTear->new($source_path);
 	if ($filter) {
-		$siteTear->setPageFilter($filter);
+		$siteTear->page_filter($filter);
 	}
-	$siteTear->copyTo($targetPath);
+	$siteTear->copy_to($target_path);
 }
 
 1;

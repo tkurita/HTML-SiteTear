@@ -21,11 +21,11 @@ HTML::SiteTear::CSS - treat cascading style sheet files.
 
  use HTML::SiteTear::CSS;
 
- $item = HTML::SiteTear::CSS->new($parent,$sourcePath,$kind);
- $item->setLinkPath($path); # usually called from the mothod "changePath"
+ $item = HTML::SiteTear::CSS->new($parent,$source_path,$kind);
+ $item->linkpath($path); # usually called from the mothod "changePath"
                             # of the parent object.
- $item->copyToLinkPath();
- $item->copyLikedFiles();
+ $item->copy_to_linkpath();
+ $item->copy_linked_files();
 
 =head1 DESCRIPTION
 
@@ -39,7 +39,7 @@ This module is to treat cascading style sheet files liked from web pages. It's a
 
 Make an instance of this moduel. The parent object "$parent" must be an instance of HTML::SiteTear::Page. This method is called from $parent.
 
-	$css = HTML::SiteTear::CSS->new($parent, $sourcePath, $kind);
+	$css = HTML::SiteTear::CSS->new($parent, $source_path, $kind);
 
 =cut
 sub new {
@@ -50,60 +50,60 @@ sub new {
   return $self;
 }
 
-=item cssCopy
+=item css_copy
 
-Copy a cascading style sheet file "$sourcePath" into $targetPath dealing with internal links. This method is called form the method "copyToLinkPath".
+Copy a cascading style sheet file "$source_path" into $target_path dealing with internal links. This method is called form the method "copy_to_linkpath".
 
-	$css->cssCopy($sourcePath, $targetPath);
+	$css->css_copy($source_path, $target_path);
 
 =cut
-sub cssCopy {
-  my ($self, $targetPath) = @_;
-  my $sourcePath = $self->sourcePath;
-  open(CSSIN, "< $sourcePath");
-  open(CSSOUT, "> $targetPath");
-  while (my $theLine = <CSSIN>) {
-	if ($theLine =~ /url\(([^()]+)\)/) {
-	  my $newLink = $self->changePath($1, $self->resourceFolderName,'css');
-	  $theLine =~ s/url\([^()]+\)/url\($newLink\)/;
+sub css_copy {
+  my ($self, $target_path) = @_;
+  my $source_path = $self->source_path;
+  open(my $CSSIN, "< $source_path");
+  open(my $CSSOUT, "> $target_path");
+  while (my $a_line = <$CSSIN>) {
+	if ($a_line =~ /url\(([^()]+)\)/) {
+	  my $new_link = $self->change_path($1, $self->resource_folder_name, 'css');
+	  $a_line =~ s/url\([^()]+\)/url\($new_link\)/;
 	}
-	print CSSOUT $theLine;
+	print $CSSOUT $a_line;
   }
-  close(CSSIN);
-  close(CSSOUT);
+  close($CSSIN);
+  close($CSSOUT);
 }
 
-=item copyToLinkPath
+=item copy_to_linkpath
 
-Copy $sourcePath into new linked path from $parent.
+Copy $source_path into new linked path from $parent.
 
-	$item->copyToLinkPath();
+	$item->copy_to_linkpath();
 
 =cut
-sub copyToLinkPath {
+sub copy_to_linkpath {
 	my ($self) = @_;
-	my $sourcePath = $self->sourcePath;
-	unless ($self->existsInCopiedFiles($sourcePath)) {
-		unless (-e $sourcePath) {
-			die("The file \"$sourcePath\" does not exists.\n");
+	my $source_path = $self->source_path;
+	unless ($self->exists_in_copied_files($source_path)) {
+		unless (-e $source_path) {
+			die("The file \"$source_path\" does not exists.\n");
 			return;
 		}
 		
-		my $targetPath;
-		unless ($targetPath = $self->itemInFileMap($sourcePath)) {
-			my $parentFile = $self->{'parent'}->targetPath;
-			$targetPath = File::Spec->rel2abs($self->linkPath, dirname($parentFile));
+		my $target_path;
+		unless ($target_path = $self->item_in_filemap($source_path)) {
+			my $parent_file = $self->{'parent'}->target_path;
+			$target_path = File::Spec->rel2abs($self->linkpath, dirname($parent_file));
 		}
 
 		print "Copying asset...\n";
-		print "from : $sourcePath\n";
-		print "to : $targetPath\n\n";
-		mkpath(dirname($targetPath));
-		$self->setTargetPath($targetPath); #temporary set for cssCopy
-		$self->cssCopy($targetPath);
-		$self->setTargetPath(Cwd::realpath($targetPath));
-		$self->add_to_copyied_files($sourcePath);
-		$self->copyLinkedFiles();
+		print "from : $source_path\n";
+		print "to : $target_path\n\n";
+		mkpath(dirname($target_path));
+		$self->target_path($target_path); #temporary set for css_copy
+		$self->css_copy($target_path);
+		$self->target_path(Cwd::realpath($target_path));
+		$self->add_to_copyied_files($source_path);
+		$self->copy_linked_files();
 	}
 }
 

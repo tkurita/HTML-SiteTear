@@ -2,12 +2,18 @@ package HTML::SiteTear::Root;
 
 use strict;
 use warnings;
-use Data::Dumper;
 use File::Spec;
 use File::Basename;
 use Cwd;
+#use Data::Dumper;
 
-our $VERSION = '1.2.3';
+use base qw(Class::Accessor);
+HTML::SiteTear::Root->mk_accessors(qw(source_root
+									resource_folder_name
+									page_folder_name
+									target_path));
+
+our $VERSION = '1.3';
 
 =head1 NAME
 
@@ -25,8 +31,8 @@ An instanece of this module is for a root object in a parent chain and manage a 
 
 =cut
 
-our $defaultPageFolderName = 'pages';
-our $defaultResourceFolderName = 'assets';
+our $defaultpage_folder_name = 'pages';
+our $defaultresource_folder_name = 'assets';
 
 =head1 METHODS
 
@@ -36,31 +42,31 @@ our $defaultResourceFolderName = 'assets';
 
 make a new instance.
 
-    $root = HTML::SiteTear::Root->new($sourceRoot, $targetPath);
+    $root = HTML::SiteTear::Root->new($source_root, $destination_path);
 
 =cut
 sub new{
-	my ($class, $sourceRoot, $targetPath) =  @_;
+	my ($class, $source_root, $destination_path) =  @_;
 
-	my $self = bless {'sourceRoot'=>$sourceRoot,
-					'targetPath'=>$targetPath,
+	my $self = bless {'source_root'=>$source_root,
+					'target_path'=>$destination_path,
 					'fileMapRef'=>{},
 					'copiedFiles'=>[]}, $class;
-	$self->set_folder_names();
+	$self->set_default_folder_names();
 	return $self;
 }
 
-sub set_folder_names {
+sub set_default_folder_names {
   my ($self) = @_;
-  $self->{'resourceFolderName'} = $defaultResourceFolderName;
-  $self->{'pageFolderName'} = $defaultPageFolderName;
+  $self->resource_folder_name($defaultresource_folder_name);
+  $self->page_folder_name($defaultpage_folder_name);
 }
 
 =item add_to_copyied_files
 
 Add a file path already copied to the copiedFiles table of the root object of the parent chain.
 
-	$item->add_to_copyied_files($sourcePath)
+	$item->add_to_copyied_files($source_path)
 
 =cut
 sub add_to_copyied_files {
@@ -70,81 +76,61 @@ sub add_to_copyied_files {
 	return 1;
 }
 
-=item existsInCopiedFiles
+=item exists_in_copied_files
 
-Check existance of $sourcePath in the copiedFiles entry.
+Check existance of $source_path in the copiedFiles entry.
 
-	$item->existsInCopiedFiles($sourcePath)
+	$item->exists_in_copied_files($source_path)
 =cut
-sub existsInCopiedFiles {
+sub exists_in_copied_files {
 	my ($self, $path) = @_;
-	return grep(/^$path$/, @{$self->{copiedFiles}});
+	return grep(/^$path$/, @{$self->{'copiedFiles'}});
 }
 
-=item addToFileMap
+=item add_to_filemap
 
-add to copyied file information into the internal table "FileMap".
+add to copyied file information into the internal table "filemap".
 
-    $root->addToFileMap($sourcePath,$targetPath);
+    $root->add_to_filemap($source_path, $destination_path);
 
 =cut
-sub addToFileMap {
-  my ($self, $sourcePath, $targetPath) = @_;
-  #$targetPath = Cwd::realpath($targetPath);
-  $self->{'fileMapRef'}->{$sourcePath} = $targetPath;
-  return $targetPath;
+sub add_to_filemap {
+  my ($self, $source_path, $destination_path) = @_;
+  #$destination_path = Cwd::realpath($destination_path);
+  $self->{'fileMapRef'}->{$source_path} = $destination_path;
+  return $destination_path;
 }
 
-=item existsInFileMap
+=item exists_in_filemap
 
-check $sourcePath is entry in FileMap
+check $source_path is entry in FileMap
 
-    $root->existsInFileMap($sourcePath);
+    $root->exists_in_filemap($source_path);
 
 =cut
-sub existsInFileMap {
+sub exists_in_filemap {
 	my ($self, $path) = @_;
 	return exists($self->{fileMapRef}->{$path});
 }
 
-sub itemInFileMap {
+sub item_in_filemap {
 	my ($self, $path) = @_;
 	return $self->{'fileMapRef'}->{$path};
 }
 
-=item relForMappedFile
+=item rel_for_mappedfile
 
 get relative path of copied file of $sourceFile from $base.
 
-    $root->relForMappedFile($sourcePath, $base);
+    $root->rel_for_mappedfile($source_path, $base);
 
 =cut
-sub relForMappedFile {
-  my ($self, $sourcePath, $base) = @_;
-  my $targetPath = ($self->{'fileMapRef'}->{$sourcePath});
-  return File::Spec->abs2rel($targetPath,$base);
+sub rel_for_mappedfile {
+  my ($self, $source_path, $base) = @_;
+  my $destination_path = ($self->{'fileMapRef'}->{$source_path});
+  return File::Spec->abs2rel($destination_path, $base);
 }
 
-##== accessors
-sub sourceRoot{
-  my ($self) = @_;
-  return $self->{'sourceRoot'};
-}
-
-sub resourceFolderName {
-  my ($self) = @_;
-  return $self->{'resourceFolderName'};
-}
-
-sub pageFolderName {
-  my ($self) = @_;
-  return $self->{'pageFolderName'};
-}
-
-sub targetPath {
-  my ($self) = @_;
-  return $self->{'targetPath'};
-}
 
 =back
 

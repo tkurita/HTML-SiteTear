@@ -2,16 +2,15 @@ package HTML::SiteTear;
 
 use strict;
 use warnings;
-
-use File::Basename; #system
-use File::Spec; #system
+use File::Basename;
+use File::Spec;
 use Carp;
 #use Data::Dumper; #system
 
-use HTML::SiteTear::Root; #a part of SiteTear
-use HTML::SiteTear::Page; #a part of SiteTear
+use HTML::SiteTear::Root;
+use HTML::SiteTear::Page;
 
-our $VERSION = '1.2.3';
+our $VERSION = '1.3';
 
 =head1 NAME
 
@@ -58,9 +57,9 @@ sub new {
 	return $self;
 }
 
-sub setPageFilter {
+sub page_filter {
 	my ($class, $module) = @_;
-	HTML::SiteTear::Page->setPageFilter($module);
+	HTML::SiteTear::Page->page_filter($module);
 	return 1;
 }
 
@@ -84,8 +83,8 @@ sub copy_to {
 
 	my $root = HTML::SiteTear::Root->new($source_path, $destination_path);
 	my $newSourcePage = HTML::SiteTear::Page->new($root, $source_path);
-	$newSourcePage->setLinkPath( basename($destination_path) );
-	$newSourcePage->copyToLinkPath();
+	$newSourcePage->linkpath( basename($destination_path) );
+	$newSourcePage->copy_to_linkpath();
 	return $newSourcePage;
 }
 

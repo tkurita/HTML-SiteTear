@@ -2,13 +2,12 @@ package HTML::SiteTear::Page;
 
 use strict;
 use warnings;
-
-use Data::Dumper;
 use Cwd;
 use File::Spec;
 use File::Basename;
 use IO::File;
 use File::Path;
+#use Data::Dumper;
 
 use HTML::SiteTear::PageFilter;
 
@@ -24,11 +23,11 @@ HTML::SiteTear::Page - treat HTML files
 
 	use HTML::SiteTear::Page;
 
-	$page = HTML::SiteTear::Page->new($parent, $sourcePath, $kind);
-	$page->setLinkPath($path); # usually called from the mothod "changePath"
+	$page = HTML::SiteTear::Page->new($parent, $source_path, $kind);
+	$page->linkpath($path); # usually called from the mothod "changePath"
                                # of the parent object.
-	$page->copyToLinkPath();
-	$page->copyLikedFiles();
+	$page->copy_to_linkpath();
+	$page->copy_linked_files();
 
 =head1 DESCRIPTION
 
@@ -42,16 +41,16 @@ This module is to tread HTML files. It's also a sub class of L<HTML::SiteTear::I
 
 Make an instance of HTML::SiteTear::Page class.
 
-	$page = HTML::SiteTear::Page->new($parent,$sourcePath, $kind)
+	$page = HTML::SiteTear::Page->new($parent,$source_path, $kind)
 
-$parent is an instance of HTML::SiteTear::Page which have an link to $sourcePath. $sourcePath is a path to a HTML file. $kind must be 'page'.
+$parent is an instance of HTML::SiteTear::Page which have an link to $source_path. $source_path is a path to a HTML file. $kind must be 'page'.
 
 =cut
 sub new {
-	my ($class, $parent, $sourcePath, $kind) = @_;
+	my ($class, $parent, $source_path, $kind) = @_;
 
 	my $self = bless {'parent'=>$parent,
-					 'sourcePath'=>$sourcePath,
+					 'source_path'=>$source_path,
 					 'kind'=>$kind },$class;
 
 	$self ->{'linkedFiles'} = [];
@@ -60,23 +59,23 @@ sub new {
 
 our $_filter_module;
 
-sub setPageFilter {
+sub page_filter {
 	my ($class, $module) = @_;
 	$_filter_module = $module;
 	eval "require $_filter_module";
 }
 
-=item copyToLinkPath
+=item copy_to_linkpath
 
-Copy $sourcePath into new linked path from $parent.
+Copy $source_path into new linked path from $parent.
 
-	$page->copyToLinkPath();
+	$page->copy_to_linkpath();
 
 =cut
-sub copyToLinkPath {
-	#print "start copyToLinkPath\n";
+sub copy_to_linkpath {
+	#print "start copy_to_linkpath\n";
 	my ($self) = @_;
-	my $parentFile = $self->{'parent'}->targetPath;
+	my $parentFile = $self->{'parent'}->target_path;
 
 	my $filter;
 	if (defined $_filter_module) {
@@ -85,45 +84,45 @@ sub copyToLinkPath {
 	else {
 		$filter = HTML::SiteTear::PageFilter->new($self);
 	}
-	my $sourcePath = $self->sourcePath();
-	unless (-e $sourcePath) {
-		die("The file \"$sourcePath\" does not exists.\n");
+	my $source_path = $self->source_path();
+	unless (-e $source_path) {
+		die("The file \"$source_path\" does not exists.\n");
 		return 0;
 	}
 	
-	my $targetPath;
-	unless ($self->existsInCopiedFiles($sourcePath)){
-		unless ($targetPath = $self->itemInFileMap($sourcePath)) {
-			$targetPath = File::Spec->rel2abs($self->linkPath(),dirname($parentFile));
+	my $target_path;
+	unless ($self->exists_in_copied_files($source_path)){
+		unless ($target_path = $self->item_in_filemap($source_path)) {
+			$target_path = File::Spec->rel2abs($self->linkpath, dirname($parentFile));
 		}
-		mkpath(dirname($targetPath));
-		my $io = IO::File->new("> $targetPath");
-		$targetPath = Cwd::realpath($targetPath);
-		$self->setTargetPath($targetPath);
+		mkpath(dirname($target_path));
+		my $io = IO::File->new("> $target_path");
+		$target_path = Cwd::realpath($target_path);
+		$self->target_path($target_path);
 		$self->{'OUT'} = $io;
 		print "Copying HTML...\n";
-		print "from : $sourcePath\n";
-		print "to : $targetPath\n\n";
-		$filter->parseFile();
+		print "from : $source_path\n";
+		print "to : $target_path\n\n";
+		$filter->parse_file();
 		$io->close;
-		$self->add_to_copyied_files($sourcePath);
-		$self->copyLinkedFiles();
+		$self->add_to_copyied_files($source_path);
+		$self->copy_linked_files;
 	}
 }
 
-sub setBinmode {
+sub set_binmode {
 	my ($self, $io_layer) = @_;
 	binmode($self->{'OUT'}, $io_layer);
 }
 
-=item writeData
+=item write_data
 
 write HTML data to the linked path form the parent object. This method is called from HTML::SiteTear::PageFilder.
 
-	$page->writeData($data)
+	$page->write_data($data)
 
 =cut
-sub writeData {
+sub write_data {
 	my ($self, $data) = @_;
 	$self->{'OUT'}->print($data);
 }
