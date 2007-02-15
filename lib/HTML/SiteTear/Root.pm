@@ -36,13 +36,11 @@ our $defaultresource_folder_name = 'assets';
 
 =head1 METHODS
 
-=over 2
-
-=item new
-
-make a new instance.
+=head2 new
 
     $root = HTML::SiteTear::Root->new($source_root, $destination_path);
+
+make a new instance.
 
 =cut
 sub new{
@@ -57,16 +55,16 @@ sub new{
 }
 
 sub set_default_folder_names {
-  my ($self) = @_;
-  $self->resource_folder_name($defaultresource_folder_name);
-  $self->page_folder_name($defaultpage_folder_name);
+	my ($self) = @_;
+	$self->resource_folder_name($defaultresource_folder_name);
+	$self->page_folder_name($defaultpage_folder_name);
 }
 
-=item add_to_copyied_files
+=head2 add_to_copyied_files
+
+    $item->add_to_copyied_files($source_path)
 
 Add a file path already copied to the copiedFiles table of the root object of the parent chain.
-
-	$item->add_to_copyied_files($source_path)
 
 =cut
 sub add_to_copyied_files {
@@ -76,36 +74,36 @@ sub add_to_copyied_files {
 	return 1;
 }
 
-=item exists_in_copied_files
+=head2 exists_in_copied_files
+
+    $item->exists_in_copied_files($source_path)
 
 Check existance of $source_path in the copiedFiles entry.
 
-	$item->exists_in_copied_files($source_path)
 =cut
 sub exists_in_copied_files {
 	my ($self, $path) = @_;
 	return grep(/^$path$/, @{$self->{'copiedFiles'}});
 }
 
-=item add_to_filemap
-
-add to copyied file information into the internal table "filemap".
+=head2 add_to_filemap
 
     $root->add_to_filemap($source_path, $destination_path);
 
+add to copyied file information into the internal table "filemap".
+
 =cut
 sub add_to_filemap {
-  my ($self, $source_path, $destination_path) = @_;
-  #$destination_path = Cwd::realpath($destination_path);
-  $self->{'fileMapRef'}->{$source_path} = $destination_path;
-  return $destination_path;
+	my ($self, $source_path, $destination_path) = @_;
+	$self->{'fileMapRef'}->{$source_path} = $destination_path;
+	return $destination_path;
 }
 
-=item exists_in_filemap
-
-check $source_path is entry in FileMap
+=head2 exists_in_filemap
 
     $root->exists_in_filemap($source_path);
+
+check $source_path is entry in FileMap
 
 =cut
 sub exists_in_filemap {
@@ -118,21 +116,19 @@ sub item_in_filemap {
 	return $self->{'fileMapRef'}->{$path};
 }
 
-=item rel_for_mappedfile
-
-get relative path of copied file of $sourceFile from $base.
+=head2 rel_for_mappedfile
 
     $root->rel_for_mappedfile($source_path, $base);
 
+get relative path of copied file of $sourceFile from $base.
+
 =cut
 sub rel_for_mappedfile {
-  my ($self, $source_path, $base) = @_;
-  my $destination_path = ($self->{'fileMapRef'}->{$source_path});
-  return File::Spec->abs2rel($destination_path, $base);
+	my ($self, $source_path, $base) = @_;
+	my $destination_path = ($self->{'fileMapRef'}->{$source_path});
+	return File::Spec->abs2rel($destination_path, $base);
 }
 
-
-=back
 
 =head1 SEE ALSO
 
@@ -144,5 +140,4 @@ Tetsuro KURITA <tkurita@mac.com>
 
 =cut
 
-##== obsolute
 1;

@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use File::Basename;
 use Encode;
+use Encode::Guess;
 #use Data::Dumper;
 
 use HTML::Parser 3.40;
@@ -31,34 +32,29 @@ This module is to change link pathes in HTML files. It's a sub class of L<HTML::
 
 =head1 METHODS
 
-=over 2
+=head2 new
 
-=item new
-
+    $filter = HTML::SiteTear::PageFilter->new($page);
+	
 Make an instance of this moduel. $parent must be an instance of HTML::SiteTear::Root or HTML::SiteTear::Page. This method is called from $parent.
 
-	$filter = HTML::SiteTear::PageFilter->new($page);
-
 =cut
-
 sub new {
 	my ($class, $page) = @_;
-
 	my $parent = $class->SUPER::new();
-	my $self = bless $parent,$class;
+	my $self = bless $parent, $class;
 	$self->{'page'} = $page;
 
 	return $self;
 }
 
-=item parse_file
+=head2 parse_file
 
-Parse the HTML file given by $page and change link pathes. The output data are retuned thru the method "writeData".
+    $filter->parse_file();
 
-	$filter->parse_file();
+Parse the HTML file given by $page and change link pathes. The output data are retuned thru the method "write_data".
 
 =cut
-
 sub parse_file {
 	my ($self) = @_;
 	
@@ -85,11 +81,16 @@ sub parse_file {
 			$encoding = 'utf8';
 			$io_layer = ':utf8';
 		}
-		else {
-			$io_layer = ":encoding($encoding)";
-			$text = Encode::decode($encoding, $text);
+	}
+	
+	unless ($io_layer) {
+		unless ($encoding) {
+			my $decoder = Encode::Guess->guess($text);
+			ref($decoder) or die("Can't guess encoding of source HTML");
+			$encoding = $decoder->name;
 		}
-		
+		$io_layer = ":encoding($encoding)";
+		$text = Encode::decode($encoding, $text);
 	}
 	
 	## tell the Page object about the IO layer
@@ -99,7 +100,17 @@ sub parse_file {
 	$self->SUPER::parse($text);
 }
 
-## overriding methods of HTML::Parser
+=head1 SEE ALOSO
+
+L<HTML::SiteTear>, L<HTML::SiteTear::Item>,  L<HTML::SiteTear::Root>, L<HTML::SiteTear:Page>
+
+=head1 AUTHOR
+
+Tetsuro KURITA <tkurita@mac.com>
+
+=cut
+
+##== overriding methods of HTML::Parser
 
 sub declaration { $_[0]->output("<!$_[1]>")     }
 sub process     { $_[0]->output($_[2])          }
@@ -203,17 +214,5 @@ sub build_attributes{
 	}
 	return $tag_attrs;
 }
-
-=back
-
-=head1 SEE ALOSO
-
-L<HTML::SiteTear>, L<HTML::SiteTear::Item>,  L<HTML::SiteTear::Root>, L<HTML::SiteTear:Page>
-
-=head1 AUTHOR
-
-Tetsuro KURITA <tkurita@mac.com>
-
-=cut
 
 1;

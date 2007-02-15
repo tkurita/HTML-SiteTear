@@ -21,7 +21,6 @@ require HTML::SiteTear::CSS;
 
 our $VERSION = '1.3';
 
-=pod
 =head1 NAME
 
 HTML::SiteTear::Item - treat javascript files, image files and so on.
@@ -42,13 +41,11 @@ This module is to treat general files liked from web pages. It's also a super cl
 
 =head1 METHODS
 
-=over 2
+=head2 new
 
-=item new
+    $item = HTML::SiteTear::Item->new($parent,$source_path,$kind);
 
 Make an instance of this moduel. $parent must be an instance of HTML::SiteTear::Root or HTML::SiteTear::Page. This method is called from $parent.
-
-	$item = HTML::SiteTear::Item->new($parent,$source_path,$kind);
 
 =cut
 
@@ -61,11 +58,11 @@ sub new {
 	return $self;
 }
 
-=item copy_to_linkpath
+=head2 copy_to_linkpath
+
+    $item->copy_to_linkpath();
 
 Copy $source_path into new linked path from $parent.
-
-	$item->copy_to_linkpath();
 
 =cut
 sub copy_to_linkpath {
@@ -94,11 +91,11 @@ sub copy_to_linkpath {
 	}
 }
 
-=item add_to_linked_files
+=head2 add_to_linked_files
+
+    $item->add_to_linked_files($linked_obj)
 
 Add $linked_obj into the internal list. in $linked_obj is an instance of HTML::SiteTear::Item or subclass of HTML::SiteTear::Item for linked files from $source_path. 
-
-	$item->add_to_linked_files($linked_obj)
 
 =cut
 sub add_to_linked_files {
@@ -106,11 +103,11 @@ sub add_to_linked_files {
 	push (@{$self->{'linkedFiles'}}, $linked_obj);
 }
 
-=item change_path
+=head2 change_path
+
+    $new_linkpath = $item->change_path($linkpath, $folder_name, $kind)
 
 make a new link path from a link path($linkpath) in $source_path. $folder_name is folder name to store, if $linkpath is not under $source_path.
-
-	$new_linkpath = $item->change_path($linkpath, $folder_name, $kind)
 
 =cut
 sub change_path {
@@ -167,11 +164,11 @@ sub change_path {
 	return $result_path
 }
 
-=item copy_linked_files
+=head2 copy_linked_files
+
+    $item->copy_linked_files();
 
 Call method "copy_to_linkpath()" of every object added by "addToLikedFiles($linked_obj)".
-
-	$item->copy_linked_files();
 
 =cut
 sub copy_linked_files {
@@ -195,13 +192,13 @@ sub copy_linked_files {
 }
 
 
-####### methods to access root object
+##== methods to access root object
 
 =item add_to_copyied_files
 
-Add a file path already copied to the copiedFiles table of the root object of the parent chain.
+    $item->add_to_copyied_files($source_path);
 
-	$item->add_to_copyied_files($source_path);
+Add a file path already copied to the copiedFiles table of the root object of the parent chain.
 
 =cut
 sub add_to_copyied_files {
@@ -209,11 +206,11 @@ sub add_to_copyied_files {
 	$self->{'parent'}->add_to_copyied_files($path);
 }
 
-=item exists_in_copied_files
+=head2 exists_in_copied_files
+
+    $item->exists_in_copied_files($source_path);
 
 Check existance of $source_path in the copiedFiles entry.
-
-	$item->exists_in_copied_files($source_path);
 
 =cut
 sub exists_in_copied_files {
@@ -221,11 +218,11 @@ sub exists_in_copied_files {
 	return $self->{'parent'}->exists_in_copied_files($path);
 }
 
-=item add_to_filemap
+=head2 add_to_filemap
+
+    $item->add_to_filemap($source_path, $target_path);
 
 Add a relation between $source_path and $target_path to the internal table of the root object of the parent chain.
-
-	$item->add_to_filemap($source_path, $target_path);
 
 =cut
 sub add_to_filemap {
@@ -233,11 +230,11 @@ sub add_to_filemap {
 	$self->{'parent'}->add_to_filemap($source_path, $target_path);
 }
 
-=item exists_in_filemap
+=head2 exists_in_filemap
+
+    $bool = $item->exists_in_filemap($source_path);
 
 Check existance of $source_path in the internal table the root object of parent chain.
-
-	$bool = $item->exists_in_filemap($source_path);
 
 =cut
 sub exists_in_filemap{
@@ -251,11 +248,11 @@ sub item_in_filemap {
 	return $self->{'parent'}->item_in_filemap($path);
 }
 
-=item source_root
+=head2 source_root
+
+    $source_root = $item->source_root;
 
 Get the root source path which is an argument of HTML::SiteTear::CopyTo.
-
-	$source_root = $item->source_root;
 
 =cut
 sub source_root{
@@ -263,11 +260,11 @@ sub source_root{
 	return $self->{'parent'}->source_root;
 }
 
-=item rel_for_mappedfile
+=head2 rel_for_mappedfile
+
+    $relativePath = $item->rel_for_mappedfile($source_path, $base);
 
 Get a relative path of the target path corresponding to $sourcePash based from $base.
-
-	$relativePath = $item->rel_for_mappedfile($source_path, $base);
 
 =cut
 sub rel_for_mappedfile {
@@ -275,35 +272,35 @@ sub rel_for_mappedfile {
   return $self->{'parent'}->rel_for_mappedfile($source_path, $base);
 }
 
-##== accessorts
+##== accessors
 
-=item source_path
+=head2 source_path
+
+    $item->source_path;
+    $item->source_path($path);
 
 Get ang set the source path of this objcet.
 
-	$item->source_path;
-	$item->source_path($path);
+=head2 target_path
 
-=item target_path
+    $item->taget_path;
+    $item->target_path($path);
 
 Get and set the target path which is the copy destination of $source_path. This method is called from "copy_to_linkpath()".
 
-	$item->taget_path;
-	$item->target_path($path);
+=head2 linkpath
 
-=item linkpath
+    $item->linkpath;
+    $item->linkpath($path);
 
 Get and set the new link path from $parent. Usually called from the method "change_path" of the parent object.
 
-	$item->linkpath;
-	$item->linkpath($path);
+=head2 page_folder_name
 
-=item page_folder_name
+    $item->page_folder_name;
+    $item->page_folder_name('pages');
 
 Get and set name of a folder to store HTML files linked from $source_path. If $item does not have the name, $parent give the name.
-
-	$item->page_folder_name;
-	$item->page_folder_name('pages');
 
 =cut
 sub page_folder_name {
@@ -321,12 +318,12 @@ sub page_folder_name {
 	}
 }
 
-=item resource_folder_name
+=head2 resource_folder_name
+
+    $item->resource_folder_name;
+    $item->resource_folder_name('assets');
 
 Get and set name of a folder to store not HTML files(javascript, image, CSS) linked from $source_path. If $item does not have the name, $parent gives the name.
-
-	$item->resource_folder_name;
-	$item->resource_folder_name('assets');
 
 =cut
 sub resource_folder_name {
@@ -343,8 +340,6 @@ sub resource_folder_name {
 		return $self->{'parent'}->resource_folder_name;
 	}
 }
-
-=back
 
 =head1 SEE ALSO
 

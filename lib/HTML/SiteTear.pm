@@ -37,17 +37,17 @@ This module is useful to make a destributable copy of a part of a web site.
 
 L<HTML::SiteTear::PageFilter> is a subclass of L<HTML::Parser>.
 
+=item L<Class::Accessor>
+
 =back
 
 =head1 METHODS
 
-=over 2
+=head2 new
 
-=item new
+    $p = HTML::SiteTear->new($source_path);
 
 Make an instance of this module. The path to source HTML file "$source_path" is required as an arguemnt.
-
-	$p = HTML::SiteTear->new($source_path);
 
 =cut
 sub new {
@@ -63,11 +63,11 @@ sub page_filter {
 	return 1;
 }
 
-=item copy_to
+=head2 copy_to
+
+    $p->copy_to($destination_path);
 
 Copy $source_path into $destination_path. All linked file in $source_path will be copied into directories under $destination_path
-
-	$p->copy_to($destination_path);
 
 =cut
 sub copy_to {
@@ -82,13 +82,11 @@ sub copy_to {
 	}
 
 	my $root = HTML::SiteTear::Root->new($source_path, $destination_path);
-	my $newSourcePage = HTML::SiteTear::Page->new($root, $source_path);
-	$newSourcePage->linkpath( basename($destination_path) );
-	$newSourcePage->copy_to_linkpath();
-	return $newSourcePage;
+	my $new_source_page = HTML::SiteTear::Page->new($root, $source_path);
+	$new_source_page->linkpath( basename($destination_path) );
+	$new_source_page->copy_to_linkpath();
+	return $new_source_page;
 }
-
-=back
 
 =head1 AUTHOR
 
