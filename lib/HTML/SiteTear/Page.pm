@@ -62,7 +62,7 @@ our $_filter_module;
 sub page_filter {
 	my ($class, $module) = @_;
 	$_filter_module = $module;
-	eval "require $_filter_module";
+	return eval "require $_filter_module";
 }
 
 =item copy_to_linkpath

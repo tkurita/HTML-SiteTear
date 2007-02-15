@@ -59,8 +59,7 @@ sub new {
 
 sub page_filter {
 	my ($class, $module) = @_;
-	HTML::SiteTear::Page->page_filter($module);
-	return 1;
+	return HTML::SiteTear::Page->page_filter($module);
 }
 
 =head2 copy_to

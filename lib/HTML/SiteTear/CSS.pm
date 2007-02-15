@@ -3,7 +3,6 @@ package HTML::SiteTear::CSS;
 #use lib '/Users/tkurita/Factories/PerlDev/ProjectsX/SiteTear/Perl_Module/lib';
 use strict;
 use warnings;
-
 use File::Spec;
 use File::Basename;
 use File::Path;
@@ -11,7 +10,7 @@ use File::Path;
 require HTML::SiteTear::Item;
 our @ISA = qw(HTML::SiteTear::Item);
 
-our $VERSION = '1.2.3';
+our $VERSION = '1.3';
 
 =head1 NAME
 
@@ -33,13 +32,11 @@ This module is to treat cascading style sheet files liked from web pages. It's a
 
 =head1 METHODS
 
-=over 2
+=head2 new
 
-=item new
+    $css = HTML::SiteTear::CSS->new($parent, $source_path, $kind);
 
 Make an instance of this moduel. The parent object "$parent" must be an instance of HTML::SiteTear::Page. This method is called from $parent.
-
-	$css = HTML::SiteTear::CSS->new($parent, $source_path, $kind);
 
 =cut
 sub new {
@@ -50,11 +47,11 @@ sub new {
   return $self;
 }
 
-=item css_copy
+=head2 css_copy
+
+    $css->css_copy($source_path, $target_path);
 
 Copy a cascading style sheet file "$source_path" into $target_path dealing with internal links. This method is called form the method "copy_to_linkpath".
-
-	$css->css_copy($source_path, $target_path);
 
 =cut
 sub css_copy {
@@ -73,11 +70,11 @@ sub css_copy {
   close($CSSOUT);
 }
 
-=item copy_to_linkpath
+=head2 copy_to_linkpath
+
+    $item->copy_to_linkpath;
 
 Copy $source_path into new linked path from $parent.
-
-	$item->copy_to_linkpath();
 
 =cut
 sub copy_to_linkpath {
@@ -103,11 +100,9 @@ sub copy_to_linkpath {
 		$self->css_copy($target_path);
 		$self->target_path(Cwd::realpath($target_path));
 		$self->add_to_copyied_files($source_path);
-		$self->copy_linked_files();
+		$self->copy_linked_files;
 	}
 }
-
-=back
 
 =head1 SEE ALSO
 

@@ -35,7 +35,7 @@ This module is to change link pathes in HTML files. It's a sub class of L<HTML::
 =head2 new
 
     $filter = HTML::SiteTear::PageFilter->new($page);
-	
+
 Make an instance of this moduel. $parent must be an instance of HTML::SiteTear::Root or HTML::SiteTear::Page. This method is called from $parent.
 
 =cut
