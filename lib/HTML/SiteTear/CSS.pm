@@ -34,17 +34,19 @@ This module is to treat cascading style sheet files liked from web pages. It's a
 
 =head2 new
 
-    $css = HTML::SiteTear::CSS->new($parent, $source_path, $kind);
+    $css = HTML::SiteTear::CSS->new('parent' => $parent, 
+                                    'source_path' => $source_path);
 
 Make an instance of this moduel. The parent object "$parent" must be an instance of HTML::SiteTear::Page. This method is called from $parent.
 
 =cut
 sub new {
-  my $class = shift @_;
-  my $self = $class->SUPER::new(@_);
-  $self = bless $self,$class;
-  $self->{'linkedFiles'} = [];
-  return $self;
+	my $class = shift @_;
+	my $self = $class->SUPER::new(@_);
+	unless ($self->kind ) { $self->kind('css') };
+	#$self = bless $self, $class;
+	$self->{'linkedFiles'} = [];
+	return $self;
 }
 
 =head2 css_copy
@@ -55,19 +57,19 @@ Copy a cascading style sheet file "$source_path" into $target_path dealing with 
 
 =cut
 sub css_copy {
-  my ($self, $target_path) = @_;
-  my $source_path = $self->source_path;
-  open(my $CSSIN, "< $source_path");
-  open(my $CSSOUT, "> $target_path");
-  while (my $a_line = <$CSSIN>) {
-	if ($a_line =~ /url\(([^()]+)\)/) {
-	  my $new_link = $self->change_path($1, $self->resource_folder_name, 'css');
-	  $a_line =~ s/url\([^()]+\)/url\($new_link\)/;
+	my ($self, $target_path) = @_;
+	my $source_path = $self->source_path;
+	open(my $CSSIN, "< $source_path");
+	open(my $CSSOUT, "> $target_path");
+	while (my $a_line = <$CSSIN>) {
+		if ($a_line =~ /url\(([^()]+)\)/) {
+			my $new_link = $self->change_path($1, $self->resource_folder_name, 'css');
+			$a_line =~ s/url\([^()]+\)/url\($new_link\)/;
+		}
+		print $CSSOUT $a_line;
 	}
-	print $CSSOUT $a_line;
-  }
-  close($CSSIN);
-  close($CSSOUT);
+	close($CSSIN);
+	close($CSSOUT);
 }
 
 =head2 copy_to_linkpath

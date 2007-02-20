@@ -13,7 +13,10 @@ use Data::Dumper;
 use base qw(Class::Accessor);
 HTML::SiteTear::Item->mk_accessors(qw(linkpath
 									source_path
-									target_path));
+									target_path
+									kind
+									parent
+                                    source_root));
 
 require HTML::SiteTear::Page;
 require HTML::SiteTear::CSS;
@@ -29,11 +32,11 @@ HTML::SiteTear::Item - treat javascript files, image files and so on.
 
  use HTML::SiteTear::Item;
 
- $item = HTML::SiteTear::Item->new($parent,$source_path,$kind);
- $item->setlinkpath($path); # usually called from the mothod "change_path"
-                            # of the parent object.
- $item->copy_to_linkpath();
- $item->copy_liked_files();
+ $item = HTML::SiteTear::Item->new($parent, $source_path, $kind);
+ $item->linkpath($path); # usually called from the mothod "change_path"
+                         # of the parent object.
+ $item->copy_to_linkpath;
+ $item->copy_liked_files;
 
 =head1 DESCRIPTION
 
@@ -43,24 +46,24 @@ This module is to treat general files liked from web pages. It's also a super cl
 
 =head2 new
 
-    $item = HTML::SiteTear::Item->new($parent,$source_path,$kind);
+    $item = HTML::SiteTear::Item->new('parent' => $parent,
+                                      'source_path' => $source_path,
+                                      'kind' => $kind);
 
 Make an instance of this moduel. $parent must be an instance of HTML::SiteTear::Root or HTML::SiteTear::Page. This method is called from $parent.
 
 =cut
-
 sub new {
-	my ($class, $parent, $source_path, $kind) = @_;
-	
-	my $self = bless {'parent' => $parent,
-					 'source_path' => $source_path,
-					 'kind' => $kind}, $class;
-	return $self;
+	my $class = shift @_;
+	my %args = @_;
+	my $self = $class->SUPER::new(\%args);
+    $self->source_root($self->parent->source_root);
+    return $self;
 }
 
 =head2 copy_to_linkpath
 
-    $item->copy_to_linkpath();
+    $item->copy_to_linkpath;
 
 Copy $source_path into new linked path from $parent.
 
@@ -68,7 +71,7 @@ Copy $source_path into new linked path from $parent.
 sub copy_to_linkpath {
 	my ($self) = @_;
 	my $source_path = $self->source_path;
-
+    $DB::single = 1;
 	unless ($self->exists_in_copied_files($source_path)) {
 		unless (-e $source_path) {
 			die("The file \"$source_path\" does not exists.\n");
@@ -77,7 +80,7 @@ sub copy_to_linkpath {
 
 		my $target_path;
 		unless ($target_path = $self->item_in_filemap($source_path)) {
-			my $parent_file = $self->{'parent'}->target_path;
+			my $parent_file = $self->parent->target_path;
 			$target_path = File::Spec->rel2abs($self->linkpath, dirname($parent_file));
 		}
 		
@@ -121,24 +124,35 @@ sub change_path {
 	if (File::Spec->file_name_is_absolute($linkpath)) {
 		return $linkpath;
 	}
+    
+    $DB::single = 1;
 	my $abs_src_path = File::Spec->rel2abs($linkpath, dirname($self->source_path) );
+    unless (-e $abs_src_path) {
+        warn("$abs_src_path is not found.\nThe link to this path is not changed.\n");
+        return $linkpath;
+    }
+    
 	$abs_src_path = Cwd::realpath($abs_src_path);
 
 	## sourceRoot 以下にあるかどうかを判定するために sourceRoot からの相対パスを求める。
-	my $rel_from_root = File::Spec->abs2rel($abs_src_path, dirname($self->source_root));
+	
+	my $rel_from_root = File::Spec->abs2rel($abs_src_path, dirname($self->source_root_path));
 	if ($self->exists_in_filemap($abs_src_path) ) {
 		$result_path = $self->rel_for_mappedfile($abs_src_path, dirname($self->target_path) );
 	}
 	else {
 		my $new_linked_obj;
+		my %args = ('parent' => $self,
+					'source_path' => $abs_src_path,
+					'kind' => $kind);
 		if ($kind eq 'page') {
-			$new_linked_obj = HTML::SiteTear::Page->new($self, $abs_src_path,$kind);
+			$new_linked_obj = HTML::SiteTear::Page->new(%args);
 		}
 		elsif ($kind eq 'css') {
-			$new_linked_obj = HTML::SiteTear::CSS->new($self, $abs_src_path,$kind);
+			$new_linked_obj = HTML::SiteTear::CSS->new(%args);
 		}
 		else {
-		 	$new_linked_obj = HTML::SiteTear::Item->new($self, $abs_src_path,$kind);
+			$new_linked_obj = HTML::SiteTear::Item->new(%args);
 		}
 	
 		my $new_linkpath;
@@ -176,7 +190,7 @@ sub copy_linked_files {
 	my @page_list = (); 
 
 	foreach my $linked_file (@{$self->{'linkedFiles'}}) {
-		if ($linked_file->{'kind'} eq 'page') {
+		if ($linked_file->kind eq 'page') {
 			push @page_list, $linked_file; 
 		}
 		else {
@@ -203,7 +217,7 @@ Add a file path already copied to the copiedFiles table of the root object of th
 =cut
 sub add_to_copyied_files {
 	my ($self, $path) = @_;
-	$self->{'parent'}->add_to_copyied_files($path);
+	$self->parent->add_to_copyied_files($path);
 }
 
 =head2 exists_in_copied_files
@@ -215,7 +229,7 @@ Check existance of $source_path in the copiedFiles entry.
 =cut
 sub exists_in_copied_files {
 	my ($self, $path) = @_;
-	return $self->{'parent'}->exists_in_copied_files($path);
+	return $self->parent->exists_in_copied_files($path);
 }
 
 =head2 add_to_filemap
@@ -227,7 +241,7 @@ Add a relation between $source_path and $target_path to the internal table of th
 =cut
 sub add_to_filemap {
 	my ($self, $source_path, $target_path) = @_;
-	$self->{'parent'}->add_to_filemap($source_path, $target_path);
+	$self->parent->add_to_filemap($source_path, $target_path);
 }
 
 =head2 exists_in_filemap
@@ -239,25 +253,27 @@ Check existance of $source_path in the internal table the root object of parent 
 =cut
 sub exists_in_filemap{
 	my ($self, $path) = @_;
-	return $self->{'parent'}->exists_in_filemap($path);
+	#return $self->parent->exists_in_filemap($path);
+    return $self->source_root->exists_in_filemap($path);
 }
 
 
 sub item_in_filemap {
 	my ($self, $path) = @_;
-	return $self->{'parent'}->item_in_filemap($path);
+	#return $self->parent->item_in_filemap($path);
+    return $self->source_root->item_in_filemap($path);
 }
 
-=head2 source_root
+=head2 source_root_path
 
-    $source_root = $item->source_root;
+    $source_root_path = $item->source_root_path;
 
 Get the root source path which is an argument of HTML::SiteTear::CopyTo.
 
 =cut
-sub source_root{
+sub source_root_path {
 	my ($self) = @_;
-	return $self->{'parent'}->source_root;
+	return $self->source_root->source_path;
 }
 
 =head2 rel_for_mappedfile
@@ -269,7 +285,7 @@ Get a relative path of the target path corresponding to $sourcePash based from $
 =cut
 sub rel_for_mappedfile {
   my ($self, $source_path, $base) = @_;
-  return $self->{'parent'}->rel_for_mappedfile($source_path, $base);
+  return $self->parent->rel_for_mappedfile($source_path, $base);
 }
 
 ##== accessors
@@ -314,7 +330,7 @@ sub page_folder_name {
 		return $self->{'page_folder_name'};
 	}
 	else {
-		return $self->{'parent'}->page_folder_name;
+		return $self->parent->page_folder_name;
 	}
 }
 
@@ -337,7 +353,7 @@ sub resource_folder_name {
 		return $self->{'resource_folder_name'};
 	}
 	else {
-		return $self->{'parent'}->resource_folder_name;
+		return $self->parent->resource_folder_name;
 	}
 }
 

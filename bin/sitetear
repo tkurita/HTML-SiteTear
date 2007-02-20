@@ -1,4 +1,5 @@
 #!/usr/bin/perl -w
+#output --siteroot "$ENV{'HOME'}/Factories/Websites/scriptfactory/web-content/" --rooturl 'http://homepage.mac.com/tkurita/scriptfactory/' '/Users/tkurita/Factories/Websites/scriptfactory/web-content/Softwares/Perl/HTML-Copy/manual/index.html' '/Users/tkurita/Factories/PerlDev/ProjectsX/HTML-Copy/Distributions/HTMLCopy template/HTML Documents/ReadMe.html'
 
 use strict;
 use File::Basename;
@@ -11,15 +12,24 @@ use HTML::SiteTear;
 our $VERSION = '1.3';
 
 {
-	my $man = 0;
+#    @ARGV = ('--siteroot', "$ENV{'HOME'}/Factories/Websites/scriptfactory/web-content/", 
+#            '--rooturl', 'http://homepage.mac.com/tkurita/scriptfactory/',
+#            '/Users/tkurita/Factories/Websites/scriptfactory/web-content/Softwares/Perl/HTML-Copy/manual/index.html',
+#            '/Users/tkurita/Factories/PerlDev/ProjectsX/HTML-Copy/Distributions/HTMLCopy template/HTML Documents/ReadMe.html');
+    my $man = 0;
 	my $help = 0;
 	my $filter;
-	
+	my $site_root_path = '';
+    my $site_root_url = '';
+    
 	GetOptions('help|?' => \$help, man => \$man,
-				'F=s'=>\$filter) or pod2usage(2);
+                'siteroot=s' => \$site_root_path,
+                'rooturl=s' => \$site_root_url,
+                'F=s'=>\$filter) or pod2usage(2);
+
 	pod2usage(-exitstatus => 0, -verbose => 1) if $help;
 	pod2usage(-exitstatus => 0, -verbose => 2) if $man;
-
+    
 	if (@ARGV > 2) {
 		pod2usage(-message => 'Too many arguments.', 
 			  -exitstatus => 1, -verbose => 1)
@@ -31,8 +41,10 @@ our $VERSION = '1.3';
 	}
 
 	my ($source_path, $target_path) = @ARGV;
-
-	my $siteTear = HTML::SiteTear->new($source_path);
+    
+	my $siteTear = HTML::SiteTear->new('source_path' => $source_path,
+                                    'site_root_path' => $site_root_path,
+                                    'site_root_url' => $site_root_url);
 	if ($filter) {
 		$siteTear->page_filter($filter);
 	}
@@ -69,6 +81,14 @@ Print a brief help message and exits.
 =item -m, --man
 
 Prints the manual page and exits.
+
+=item --siteroot
+
+The root path of the web site including SOURCE
+
+=item --rooturl
+
+The URL of the root path of the web site including SOURCE
 
 =back
 

@@ -1,14 +1,19 @@
 #!perl -w
+use 5.008;
 use strict;
 use ExtUtils::MakeMaker;
 
 my @programs_to_install = qw(sitetear);
 
 WriteMakefile(
-    'NAME'	 => 'HTML::SiteTear',
-    'VERSION_FROM' => 'lib/HTML/SiteTear.pm',
+	'NAME'	 => 'HTML::SiteTear',
+	'VERSION_FROM' => 'lib/HTML/SiteTear.pm',
 	'EXE_FILES'     => [ map {"bin/$_"} @programs_to_install ],
 	'PREREQ_PM' => {
-        'HTML::Parser' => 0
-    },
+		'Test::More'   => 0,
+		'HTML::Parser' => 3.40,
+		'Class::Accessor' => 0
+	},
+	'dist'           => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },	
+	'clean'          => { FILES => 'HTML-SiteTear-*' },
 );

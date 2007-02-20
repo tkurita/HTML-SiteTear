@@ -5,13 +5,15 @@ use warnings;
 use File::Spec;
 use File::Basename;
 use Cwd;
-#use Data::Dumper;
-
 use base qw(Class::Accessor);
-HTML::SiteTear::Root->mk_accessors(qw(source_root
+HTML::SiteTear::Root->mk_accessors(qw(source_path
 									resource_folder_name
 									page_folder_name
-									target_path));
+									target_path
+                                    site_root_path
+                                    site_root_url
+                                    allow_abs_link));
+#use Data::Dumper;
 
 our $VERSION = '1.3';
 
@@ -23,7 +25,7 @@ HTML::SiteTear::Root - a root object in a parent chain.
 
  use HTML::SiteTear::Root;
 
- $root = HTML::SiteTear::Root->new();
+ $root = HTML::SiteTear::Root->new($source_path, $target_path);
 
 =head1 DESCRIPTION
 
@@ -38,19 +40,21 @@ our $defaultresource_folder_name = 'assets';
 
 =head2 new
 
-    $root = HTML::SiteTear::Root->new($source_root, $destination_path);
+    $root = HTML::SiteTear::Root->new('source_path' => $source_path,
+                                      'target_path' => $destination_path);
 
 make a new instance.
 
 =cut
-sub new{
-	my ($class, $source_root, $destination_path) =  @_;
-
-	my $self = bless {'source_root'=>$source_root,
-					'target_path'=>$destination_path,
-					'fileMapRef'=>{},
-					'copiedFiles'=>[]}, $class;
-	$self->set_default_folder_names();
+sub new {
+	my $class = shift @_;
+	my %args = @_;
+	my $self = $class->SUPER::new(\%args);
+	$self->{'fileMapRef'} = {};
+	$self->{'copiedFiles'} = [];
+	$self->set_default_folder_names;
+    $self->allow_abs_link($self->site_root_path and $self->site_root_url);
+    
 	return $self;
 }
 
@@ -71,7 +75,7 @@ sub add_to_copyied_files {
 	my ($self, $path) = @_;
 	#$path = Cwd::realpath($path);
 	push @{$self->{'copiedFiles'}}, $path;
-	return 1;
+	return $path;
 }
 
 =head2 exists_in_copied_files
@@ -129,6 +133,15 @@ sub rel_for_mappedfile {
 	return File::Spec->abs2rel($destination_path, $base);
 }
 
+sub source_root_path {
+    my $self = shift @_;
+    return $self->source_path;
+}
+
+sub source_root {
+    my $self = shift @_;
+    return $self
+}
 
 =head1 SEE ALSO
 

@@ -40,17 +40,18 @@ Make an instance of this moduel. $parent must be an instance of HTML::SiteTear::
 
 =cut
 sub new {
-	my ($class, $page) = @_;
-	my $parent = $class->SUPER::new();
-	my $self = bless $parent, $class;
-	$self->{'page'} = $page;
-
-	return $self;
+    my ($class, $page) = @_;
+    my $parent = $class->SUPER::new();
+    my $self = bless $parent, $class;
+    $self->{'page'} = $page;
+    $self->{'allow_abs_link'} = $self->{'page'}->source_root->allow_abs_link;
+    $self->{'use_abs_link'} = 0;
+    return $self;
 }
 
 =head2 parse_file
 
-    $filter->parse_file();
+    $filter->parse_file;
 
 Parse the HTML file given by $page and change link pathes. The output data are retuned thru the method "write_data".
 
@@ -95,7 +96,6 @@ sub parse_file {
 	
 	## tell the Page object about the IO layer
 	$self->{'page'}->set_binmode($io_layer);
-
 	## parse
 	$self->SUPER::parse($text);
 }
@@ -110,17 +110,41 @@ Tetsuro KURITA <tkurita@mac.com>
 
 =cut
 
+##== private methods
+sub output {
+  my $self = $_[0];
+  $self->{'page'}->write_data($_[1]);
+}
+
+sub build_attributes{
+	my ($self, $attr_dict, $attr_names) = @_;
+	my $tag_attrs='';
+	foreach my $attr_name (@{$attr_names}) {
+		my $attr_value = $attr_dict ->{$attr_name};
+		$tag_attrs = "$tag_attrs $attr_name=\"$attr_value\"";
+	}
+	return $tag_attrs;
+}
+
 ##== overriding methods of HTML::Parser
 
 sub declaration { $_[0]->output("<!$_[1]>")     }
 sub process     { $_[0]->output($_[2])          }
-sub comment     { $_[0]->output("<!--$_[1]-->") }
 sub end         { $_[0]->output($_[2])          }
 sub text        { $_[0]->output($_[1])          }
 
-sub output{
-  my $self =  $_[0];
-  $self->{'page'}->write_data($_[1]);
+sub comment {
+	my ($self, $comment) = @_;
+    if ($self->{'allow_abs_link'}) {
+    	if ($comment =~ /^begin abs_link/) {
+            $self->{'use_abs_link'} = 1;
+    	}
+    	elsif($comment =~ /^end abs_link/) {
+    		$self->{'use_abs_link'} = 0;
+    	}
+    }
+
+	$self->output("<!--$comment-->");
 }
 
 sub start {
@@ -137,7 +161,7 @@ sub start {
 	}
 	#background images
 	elsif ($_[0] eq 'body'){
-		if (exists($_[1]->{background})) {
+		if (exists($_[1]->{'background'})) {
 			my $img_file =  $_[1] ->{'background'};
 			my $folder_name = $page->resource_folder_name;
 			$_[1]->{'background'} = $page->change_path($img_file, $folder_name, $folder_name);
@@ -170,49 +194,48 @@ sub start {
 		$_[3] = "<$_[0]"."$tag_attrs>";
 	}
 	#javascript
-	elsif ($_[0] eq 'script'){
-		if (exists($_[1]->{'src'})){
+	elsif ($_[0] eq 'script') {
+		if (exists($_[1]->{'src'})) {
 			my $scriptFile = $_[1]->{'src'};
 			my $folder_name = $page->resource_folder_name;
-			$_[1]->{'src'} = $page->change_path($scriptFile, $folder_name, $folder_name);
+			$_[1]->{'src'} = $page->change_path($scriptFile, 
+									$folder_name, $folder_name);
 			my $tag_attrs = $self->build_attributes($_[1], $_[2]);
 			$_[3] = "<$_[0]"."$tag_attrs>";
 		}
 	}
 	#link
-	elsif ($_[0] eq 'a'){
-		if (exists($_[1]->{'href'})){
+	elsif ($_[0] eq 'a') {
+		if ( exists($_[1]->{'href'}) ) {
 			my $href =  $_[1]->{'href'};
 			my $kind = 'page';
-			if ($href =~ /^(?!http:|https:|ftp:|mailto:|#)(.+)/ ){
-				my $folder_name = $page->page_folder_name;
-				if ($href =~/(.+)#(.*)/){
-					$_[1]->{'href'} = $page->change_path($1, $folder_name, $kind)."#$2";
-				}
-				else{
-					my @matchedSuffix = grep {$href =~ /\Q$_\E$/} @htmlSuffix;
-					unless (@matchedSuffix) {
-						$folder_name = $page->resource_folder_name;
-						$kind = $folder_name;
-					}
-					$_[1]->{'href'} = $page->change_path($href, $folder_name, $kind);
-				}
+			#if ($href =~ /^(?!http:|https:|ftp:|mailto:|#)(.+)/ ){
+            if ($href !~ /^(http:|https:|ftp:|mailto:|#)/ ){
+                if ($self->{'use_abs_link'}) {
+    				$_[1]->{href} = $self->{'page'}->build_abs_url($href);
+                 }
+                 else {
+    				my $folder_name = $page->page_folder_name;
+    				if ($href =~/(.+)#(.*)/){
+    					$_[1]->{'href'} = $page->change_path($1, $folder_name, $kind)."#$2";
+    				}
+    				else{
+    					my @matchedSuffix = grep {$href =~ /\Q$_\E$/} @htmlSuffix;
+    					unless (@matchedSuffix) {
+    						$folder_name = $page->resource_folder_name;
+    						$kind = $folder_name;
+    					}
+    					$_[1]->{'href'} = $page->change_path($href, $folder_name, $kind);
+    				}
+    			}
+                
 				my $tag_attrs = $self->build_attributes($_[1],$_[2]);
 				$_[3] = "<$_[0]"."$tag_attrs>";
-			}
+            }
 		}
 	}
+    
 	$self->output($_[3]);
-}
-
-sub build_attributes{
-	my ($self, $attr_dict, $attr_names) = @_;
-	my $tag_attrs='';
-	foreach my $attr_name (@{$attr_names}) {
-		my $attr_value = $attr_dict ->{$attr_name};
-		$tag_attrs = "$tag_attrs $attr_name=\"$attr_value\"";
-	}
-	return $tag_attrs;
 }
 
 1;
