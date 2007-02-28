@@ -11,6 +11,8 @@ use HTML::Parser 3.40;
 use HTML::HeadParser;
 use base qw(HTML::Parser);
 
+use HTML::Copy;
+
 our $VERSION = '1.3';
 our @htmlSuffix = qw(.html .htm);
 
@@ -58,46 +60,9 @@ Parse the HTML file given by $page and change link pathes. The output data are r
 =cut
 sub parse_file {
 	my ($self) = @_;
-	
-	## read file contents
-	my $file = $self->{'page'}->source_path;
-	open(my $in, "<", $file) or die "I can't open $file";
-	my $text;
-	{local $/; $text=<$in>;}
-	close($in);
-	
-	## check file encodeing
-	my $p = HTML::HeadParser->new;
-	$p->utf8_mode(1);
-	$p->parse($text);
-	my $contentTypeText = $p->header('content-type');
-	
-	## decode text depending on its chracter encoding
-	my $encoding = '';
-	my $io_layer = '';
-	if ($contentTypeText =~ /charset\s*=(.+)/) {
-		$encoding = $1;
-		if ($encoding eq 'utf-8') {
-			utf8::decode($text);
-			$encoding = 'utf8';
-			$io_layer = ':utf8';
-		}
-	}
-	
-	unless ($io_layer) {
-		unless ($encoding) {
-			my $decoder = Encode::Guess->guess($text);
-			ref($decoder) or die("Can't guess encoding of source HTML");
-			$encoding = $decoder->name;
-		}
-		$io_layer = ":encoding($encoding)";
-		$text = Encode::decode($encoding, $text);
-	}
-	
-	## tell the Page object about the IO layer
-	$self->{'page'}->set_binmode($io_layer);
-	## parse
-	$self->SUPER::parse($text);
+    my $p = HTML::Copy->new($self->{'page'}->source_path);
+    $self->{'page'}->set_binmode($p->io_layer);
+	$self->SUPER::parse($p->source_html);
 }
 
 =head1 SEE ALOSO
@@ -209,8 +174,7 @@ sub start {
 		if ( exists($_[1]->{'href'}) ) {
 			my $href =  $_[1]->{'href'};
 			my $kind = 'page';
-			#if ($href =~ /^(?!http:|https:|ftp:|mailto:|#)(.+)/ ){
-            if ($href !~ /^(http:|https:|ftp:|mailto:|#)/ ){
+            if ($href !~ /^(http:|https:|ftp:|mailto:|help:|#)/ ){
                 if ($self->{'use_abs_link'}) {
     				$_[1]->{href} = $self->{'page'}->build_abs_url($href);
                  }
@@ -228,14 +192,40 @@ sub start {
     					$_[1]->{'href'} = $page->change_path($href, $folder_name, $kind);
     				}
     			}
-                
 				my $tag_attrs = $self->build_attributes($_[1],$_[2]);
 				$_[3] = "<$_[0]"."$tag_attrs>";
+            }
+            elsif ($href =~ /^help:(.+)/) {
+                my $helplink = $1;
+                while ($helplink =~ /\s*(\w+)=\'(.+?)\'(.*)/) {
+                    #$DB::single = 1;
+                    if ($1 eq 'runscript') {
+                        $self->helpbook_item($2);
+                    }
+                    unless ($3) {last}
+                    $helplink = $3;
+                    
+                }
             }
 		}
 	}
     
 	$self->output($_[3]);
+}
+
+sub helpbook_item {
+    my ($self, $helplink) = @_;
+    my $page = $self->{'page'};
+    my $source_root_path = $page->source_root->source_root_path;
+    my $script_path = File::Spec->catfile(dirname($source_root_path), $helplink);
+    unless (-e $script_path) {
+        warn("Can't find $script_path.\n");
+        return ();
+    }
+    my $rel_path = File::Spec->abs2rel($script_path, 
+                                    dirname($page->source_path));
+    my $folder_name = $page->resource_folder_name;
+    $page->change_path($rel_path, $folder_name, $folder_name);
 }
 
 1;

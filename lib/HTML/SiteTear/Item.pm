@@ -71,7 +71,6 @@ Copy $source_path into new linked path from $parent.
 sub copy_to_linkpath {
 	my ($self) = @_;
 	my $source_path = $self->source_path;
-    $DB::single = 1;
 	unless ($self->exists_in_copied_files($source_path)) {
 		unless (-e $source_path) {
 			die("The file \"$source_path\" does not exists.\n");
@@ -125,7 +124,6 @@ sub change_path {
 		return $linkpath;
 	}
     
-    $DB::single = 1;
 	my $abs_src_path = File::Spec->rel2abs($linkpath, dirname($self->source_path) );
     unless (-e $abs_src_path) {
         warn("$abs_src_path is not found.\nThe link to this path is not changed.\n");
