@@ -195,37 +195,37 @@ sub start {
 				my $tag_attrs = $self->build_attributes($_[1],$_[2]);
 				$_[3] = "<$_[0]"."$tag_attrs>";
             }
-            elsif ($href =~ /^help:(.+)/) {
-                my $helplink = $1;
-                while ($helplink =~ /\s*(\w+)=\'(.+?)\'(.*)/) {
-                    #$DB::single = 1;
-                    if ($1 eq 'runscript') {
-                        $self->helpbook_item($2);
-                    }
-                    unless ($3) {last}
-                    $helplink = $3;
-                    
-                }
-            }
+#            elsif ($href =~ /^help:(.+)/) {
+#                my $helplink = $1;
+#                while ($helplink =~ /\s*(\w+)=\'(.+?)\'(.*)/) {
+#                    #$DB::single = 1;
+#                    if ($1 eq 'runscript') {
+#                        $self->helpbook_item($2);
+#                    }
+#                    unless ($3) {last}
+#                    $helplink = $3;
+#                    
+#                }
+#            }
 		}
 	}
     
 	$self->output($_[3]);
 }
 
-sub helpbook_item {
-    my ($self, $helplink) = @_;
-    my $page = $self->{'page'};
-    my $source_root_path = $page->source_root->source_root_path;
-    my $script_path = File::Spec->catfile(dirname($source_root_path), $helplink);
-    unless (-e $script_path) {
-        warn("Can't find $script_path.\n");
-        return ();
-    }
-    my $rel_path = File::Spec->abs2rel($script_path, 
-                                    dirname($page->source_path));
-    my $folder_name = $page->resource_folder_name;
-    $page->change_path($rel_path, $folder_name, $folder_name);
-}
+#sub helpbook_item {
+#    my ($self, $helplink) = @_;
+#    my $page = $self->{'page'};
+#    my $source_root_path = $page->source_root->source_root_path;
+#    my $script_path = File::Spec->catfile(dirname($source_root_path), $helplink);
+#    unless (-e $script_path) {
+#        warn("Can't find $script_path.\n");
+#        return ();
+#    }
+#    my $rel_path = File::Spec->abs2rel($script_path, 
+#                                    dirname($page->source_path));
+#    my $folder_name = $page->resource_folder_name;
+#    $page->change_path($rel_path, $folder_name, $folder_name);
+#}
 
 1;
