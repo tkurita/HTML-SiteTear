@@ -20,7 +20,7 @@ our $VERSION = '1.3';
 
 =head1 NAME
 
-HTML::SiteTear - Make a separated copy form a part of a web site
+HTML::SiteTear - Make a separated copy of a part of the site
 
 =head1 SYMPOSIS
 
