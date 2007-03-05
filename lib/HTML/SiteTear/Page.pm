@@ -13,7 +13,7 @@ use HTML::SiteTear::PageFilter;
 
 require HTML::SiteTear::Item;
 our @ISA = qw(HTML::SiteTear::Item);
-our $VERSION = '1.3';
+our $VERSION = '1.30';
 
 =head1 NAME
 

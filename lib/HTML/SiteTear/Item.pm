@@ -22,7 +22,7 @@ require HTML::SiteTear::Page;
 require HTML::SiteTear::CSS;
 
 
-our $VERSION = '1.3';
+our $VERSION = '1.30';
 
 =head1 NAME
 

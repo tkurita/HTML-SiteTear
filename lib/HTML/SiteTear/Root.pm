@@ -15,7 +15,7 @@ HTML::SiteTear::Root->mk_accessors(qw(source_path
                                     allow_abs_link));
 #use Data::Dumper;
 
-our $VERSION = '1.3';
+our $VERSION = '1.30';
 
 =head1 NAME
 

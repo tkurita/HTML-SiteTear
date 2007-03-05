@@ -16,7 +16,7 @@ HTML::SiteTear->mk_accessors( qw(source_path
 use HTML::SiteTear::Root;
 use HTML::SiteTear::Page;
 
-our $VERSION = '1.3';
+our $VERSION = '1.30';
 
 =head1 NAME
 

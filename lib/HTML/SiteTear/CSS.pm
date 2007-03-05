@@ -1,6 +1,5 @@
 package HTML::SiteTear::CSS;
 
-#use lib '/Users/tkurita/Factories/PerlDev/ProjectsX/SiteTear/Perl_Module/lib';
 use strict;
 use warnings;
 use File::Spec;
@@ -10,7 +9,7 @@ use File::Path;
 require HTML::SiteTear::Item;
 our @ISA = qw(HTML::SiteTear::Item);
 
-our $VERSION = '1.3';
+our $VERSION = '1.30';
 
 =head1 NAME
 

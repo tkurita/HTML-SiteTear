@@ -13,7 +13,7 @@ use base qw(HTML::Parser);
 
 use HTML::Copy;
 
-our $VERSION = '1.3';
+our $VERSION = '1.30';
 our @htmlSuffix = qw(.html .htm);
 
 =head1 NAME
