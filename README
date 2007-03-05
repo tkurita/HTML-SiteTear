@@ -19,6 +19,8 @@ To install this module type the following:
 This module requires these other modules and libraries:
 
   HTML::Parser
+  HTML::Copy
+  Class::Accessor
 
 == COPYRIGHT
 
