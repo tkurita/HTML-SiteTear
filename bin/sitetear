@@ -1,5 +1,4 @@
 #!/usr/bin/perl -w
-#output --siteroot "$ENV{'HOME'}/Factories/Websites/scriptfactory/web-content/" --rooturl 'http://homepage.mac.com/tkurita/scriptfactory/' '/Users/tkurita/Factories/Websites/scriptfactory/web-content/Softwares/Perl/HTML-Copy/manual/index.html' '/Users/tkurita/Factories/PerlDev/ProjectsX/HTML-Copy/Distributions/HTMLCopy template/HTML Documents/ReadMe.html'
 
 use strict;
 use File::Basename;
@@ -12,10 +11,6 @@ use HTML::SiteTear;
 our $VERSION = '1.3';
 
 {
-#    @ARGV = ('--siteroot', "$ENV{'HOME'}/Factories/Websites/scriptfactory/web-content/", 
-#            '--rooturl', 'http://homepage.mac.com/tkurita/scriptfactory/',
-#            '/Users/tkurita/Factories/Websites/scriptfactory/web-content/Softwares/Perl/HTML-Copy/manual/index.html',
-#            '/Users/tkurita/Factories/PerlDev/ProjectsX/HTML-Copy/Distributions/HTMLCopy template/HTML Documents/ReadMe.html');
     my $man = 0;
 	my $help = 0;
 	my $filter;
@@ -72,7 +67,7 @@ This command is useful to make a destributable copy of a part of a web site.
 
 =head1 OPTIONS
 
-=over 4
+=over
 
 =item -h, --help
 

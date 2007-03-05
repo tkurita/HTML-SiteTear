@@ -18,17 +18,17 @@ HTML::SiteTear::CSS - treat cascading style sheet files.
 
 =head1 SYMPOSIS
 
- use HTML::SiteTear::CSS;
-
- $item = HTML::SiteTear::CSS->new($parent,$source_path,$kind);
- $item->linkpath($path); # usually called from the mothod "changePath"
-                            # of the parent object.
- $item->copy_to_linkpath();
- $item->copy_linked_files();
+  use HTML::SiteTear::CSS;
+  
+  $item = HTML::SiteTear::CSS->new($parent,$source_path,$kind);
+  $item->linkpath($path); # usually called from the mothod "change_path"
+                          # of the parent object.
+  $item->copy_to_linkpath();
+  $item->copy_linked_files();
 
 =head1 DESCRIPTION
 
-This module is to treat cascading style sheet files liked from web pages. It's also a sub class of L<HTML::SiteTear::Item>. Internal use only.
+This module is to treat cascading style sheet files liked from web pages. It's also a sub class of the L<HTML::SiteTear::Item>. Internal use only.
 
 =head1 METHODS
 
@@ -40,6 +40,7 @@ This module is to treat cascading style sheet files liked from web pages. It's a
 Make an instance of this moduel. The parent object "$parent" must be an instance of HTML::SiteTear::Page. This method is called from $parent.
 
 =cut
+
 sub new {
 	my $class = shift @_;
 	my $self = $class->SUPER::new(@_);
@@ -56,6 +57,7 @@ sub new {
 Copy a cascading style sheet file "$source_path" into $target_path dealing with internal links. This method is called form the method "copy_to_linkpath".
 
 =cut
+
 sub css_copy {
 	my ($self, $target_path) = @_;
 	my $source_path = $self->source_path;
@@ -79,6 +81,7 @@ sub css_copy {
 Copy $source_path into new linked path from $parent.
 
 =cut
+
 sub copy_to_linkpath {
 	my ($self) = @_;
 	my $source_path = $self->source_path;

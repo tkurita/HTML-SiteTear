@@ -24,7 +24,7 @@ HTML::SiteTear::Page - treat HTML files
   use HTML::SiteTear::Page;
 
   $page = HTML::SiteTear::Page->new($parent, $source_path, $kind);
-  $page->linkpath($path); # usually called from the mothod "changePath"
+  $page->linkpath($path); # usually called from the mothod "change_path"
                           # of the parent object.
   $page->copy_to_linkpath();
   $page->copy_linked_files();
@@ -38,13 +38,14 @@ This module is to tread HTML files. It's also a sub class of L<HTML::SiteTear::I
 =head2 new
 
     $page = HTML::SiteTear::Page->new('parent' => $parent,
-                                    'source_path' => $source_path);
+                                      'source_path' => $source_path);
 
 Make an instance of HTML::SiteTear::Page class.
 
 $parent is an instance of HTML::SiteTear::Page which have an link to $source_path. $source_path is a path to a HTML file. $kind must be 'page'.
 
 =cut
+
 sub new {
 	my $class = shift @_;
 	my $self = $class->SUPER::new(@_);
@@ -68,6 +69,7 @@ sub page_filter {
 Copy $source_path into new linked path from $parent.
 
 =cut
+
 sub copy_to_linkpath {
 	#print "start copy_to_linkpath\n";
 	my ($self) = @_;
@@ -119,8 +121,8 @@ sub set_binmode {
 
 Write HTML data to the linked path form the parent object. This method is called from HTML::SiteTear::PageFilder.
 
-
 =cut
+
 sub write_data {
 	my ($self, $data) = @_;
 	$self->{'OUT'}->print($data);
@@ -138,7 +140,7 @@ sub build_abs_url {
 
 =head1 SEE ALOSO
 
-L<HTML::SiteTear>, L<HTML::SiteTear::Item>, L<HTML::SiteTear::CSS>, L<HTML::SiteTear::Root>, L<HTML::SiteTear:PageFilter>
+L<HTML::SiteTear>, L<HTML::SiteTear::Item>, L<HTML::SiteTear::CSS>, L<HTML::SiteTear::Root>, L<HTML::SiteTear::dPageFilter>
 
 =head1 AUTHOR
 

@@ -12,6 +12,7 @@ WriteMakefile(
 	'PREREQ_PM' => {
 		'Test::More'   => 0,
 		'HTML::Parser' => 3.40,
+        'HTML::Copy' => 0,
 		'Class::Accessor' => 0
 	},
 	'dist'           => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },	

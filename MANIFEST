@@ -7,3 +7,4 @@ lib/HTML/SiteTear/Root.pm
 lib/HTML/SiteTear/Page.pm
 lib/HTML/SiteTear/CSS.pm
 bin/sitetear
+META.yml                                 Module meta-data (added by MakeMaker)

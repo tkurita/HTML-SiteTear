@@ -53,6 +53,7 @@ This module is to treat general files liked from web pages. It's also a super cl
 Make an instance of this moduel. $parent must be an instance of HTML::SiteTear::Root or HTML::SiteTear::Page. This method is called from $parent.
 
 =cut
+
 sub new {
 	my $class = shift @_;
 	my %args = @_;
@@ -68,6 +69,7 @@ sub new {
 Copy $source_path into new linked path from $parent.
 
 =cut
+
 sub copy_to_linkpath {
 	my ($self) = @_;
 	my $source_path = $self->source_path;
@@ -100,6 +102,7 @@ sub copy_to_linkpath {
 Add $linked_obj into the internal list. in $linked_obj is an instance of HTML::SiteTear::Item or subclass of HTML::SiteTear::Item for linked files from $source_path. 
 
 =cut
+
 sub add_to_linked_files {
 	my ($self, $linked_obj) = @_;
 	push (@{$self->{'linkedFiles'}}, $linked_obj);
@@ -112,6 +115,7 @@ sub add_to_linked_files {
 make a new link path from a link path($linkpath) in $source_path. $folder_name is folder name to store, if $linkpath is not under $source_path.
 
 =cut
+
 sub change_path {
 #	print STDERR "start change_path\n";
 	my ($self, $linkpath, $folder_name, $kind) = @_;
@@ -183,6 +187,7 @@ sub change_path {
 Call method "copy_to_linkpath()" of every object added by "addToLikedFiles($linked_obj)".
 
 =cut
+
 sub copy_linked_files {
 	my ($self) = @_;
 	my @page_list = (); 
@@ -206,13 +211,14 @@ sub copy_linked_files {
 
 ##== methods to access root object
 
-=item add_to_copyied_files
+=head2 add_to_copyied_files
 
     $item->add_to_copyied_files($source_path);
 
 Add a file path already copied to the copiedFiles table of the root object of the parent chain.
 
 =cut
+
 sub add_to_copyied_files {
 	my ($self, $path) = @_;
 	$self->parent->add_to_copyied_files($path);
@@ -225,6 +231,7 @@ sub add_to_copyied_files {
 Check existance of $source_path in the copiedFiles entry.
 
 =cut
+
 sub exists_in_copied_files {
 	my ($self, $path) = @_;
 	return $self->parent->exists_in_copied_files($path);
@@ -237,6 +244,7 @@ sub exists_in_copied_files {
 Add a relation between $source_path and $target_path to the internal table of the root object of the parent chain.
 
 =cut
+
 sub add_to_filemap {
 	my ($self, $source_path, $target_path) = @_;
 	$self->parent->add_to_filemap($source_path, $target_path);
@@ -249,6 +257,7 @@ sub add_to_filemap {
 Check existance of $source_path in the internal table the root object of parent chain.
 
 =cut
+
 sub exists_in_filemap{
 	my ($self, $path) = @_;
 	#return $self->parent->exists_in_filemap($path);
@@ -269,6 +278,7 @@ sub item_in_filemap {
 Get the root source path which is an argument of HTML::SiteTear::CopyTo.
 
 =cut
+
 sub source_root_path {
 	my ($self) = @_;
 	return $self->source_root->source_path;
@@ -281,6 +291,7 @@ sub source_root_path {
 Get a relative path of the target path corresponding to $sourcePash based from $base.
 
 =cut
+
 sub rel_for_mappedfile {
   my ($self, $source_path, $base) = @_;
   return $self->parent->rel_for_mappedfile($source_path, $base);
@@ -317,6 +328,7 @@ Get and set the new link path from $parent. Usually called from the method "chan
 Get and set name of a folder to store HTML files linked from $source_path. If $item does not have the name, $parent give the name.
 
 =cut
+
 sub page_folder_name {
 	my $self =  shift @_;
 	
@@ -340,6 +352,7 @@ sub page_folder_name {
 Get and set name of a folder to store not HTML files(javascript, image, CSS) linked from $source_path. If $item does not have the name, $parent gives the name.
 
 =cut
+
 sub resource_folder_name {
 	my $self = shift @_;
 	

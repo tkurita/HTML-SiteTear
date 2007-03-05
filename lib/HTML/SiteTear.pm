@@ -35,18 +35,6 @@ This module is to make a separated copy of a part of web site in local file syst
 
 This module is useful to make a destributable copy of a part of a web site.
 
-=head1 REQUIRED MODULES
-
-=over 2
-
-=item L<HTML::Parser>
-
-L<HTML::SiteTear::PageFilter> is a subclass of L<HTML::Parser>.
-
-=item L<Class::Accessor>
-
-=back
-
 =head1 METHODS
 
 =head2 new
@@ -56,9 +44,10 @@ L<HTML::SiteTear::PageFilter> is a subclass of L<HTML::Parser>.
                              'site_root_path' => $root_path,
                              'site_root_url' => $url);
 
-Make an instance of this module. The path to source HTML file "$source_path" is required as an arguemnt.
+Make an instance of this module. The path to source HTML file "$source_path" is required as an arguemnt. See L</ABSOLUTE LINK> about 'site_root_path' and 'site_root_url' parameters
 
 =cut
+
 sub new {
 	my $class = shift @_;
     my $self;
@@ -67,10 +56,10 @@ sub new {
     }
     else {
         my %args = @_;
-        $self = bless \%args, $class;
+        $self = $class->SUPER::new(\%args);
     }
     $self->source_path or croak "source_path is not specified.\n";
-    (-e $self->source_path) or croak "$self->source_path is not found.\n";
+    (-e $self->source_path) or croak $self->source_path." is not found.\n";
 
     return $self;
 }
@@ -87,6 +76,7 @@ sub page_filter {
 Copy $source_path into $destination_path. All linked file in $source_path will be copied into directories under $destination_path
 
 =cut
+
 sub copy_to {
     #print "start copyTo in SiteTear.pm\n";
     my ($self, $destination_path) = @_;
@@ -107,6 +97,36 @@ sub copy_to {
     $new_source_page->copy_to_linkpath;
     return $new_source_page;
 }
+
+=head1 ABSOLUTE LINK
+
+The default behavior of HTML::SiteTear follows all of links in HTML files. In some case, there are links should not be followd. For example, if theare is a link to the top page of the site, all of files in the site will be copyied. Such links should be converted to absolute links (ex. "http://www.....").
+
+To convert links should not be followed into absolute links,
+
+=over
+
+=item *
+
+Give parameters of 'site_root_path' and 'site_root_url' to L</new> method.
+
+=over
+
+=item 'site_root_path'
+
+A file path of the root of the site in the local file system.
+
+=item 'site_root_url'
+
+A URL corresponding to 'site_root_path' in WWW.
+
+=back
+
+=item *
+
+To indicate links should be conveted to absolute links, enclose links in HTML files with specail comment tags <!-- begin abs_link --> and <!-- end abs_link -->
+
+=back
 
 =head1 AUTHOR
 
