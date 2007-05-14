@@ -13,7 +13,7 @@ use base qw(HTML::Parser);
 
 use HTML::Copy;
 
-our $VERSION = '1.30';
+our $VERSION = '1.31';
 our @htmlSuffix = qw(.html .htm);
 
 =head1 NAME
@@ -82,13 +82,17 @@ sub output {
 }
 
 sub build_attributes{
-	my ($self, $attr_dict, $attr_names) = @_;
-	my $tag_attrs='';
-	foreach my $attr_name (@{$attr_names}) {
-		my $attr_value = $attr_dict ->{$attr_name};
-		$tag_attrs = "$tag_attrs $attr_name=\"$attr_value\"";
-	}
-	return $tag_attrs;
+    my ($self, $attr_dict, $attr_names) = @_;
+    my @attrs = ();
+    foreach my $attr_name (@{$attr_names}) {
+        if ($attr_name eq '/') {
+            push @attrs, '/';
+        } else {
+            my $attr_value = $attr_dict->{$attr_name};
+            push @attrs, "$attr_name=\"$attr_value\"";
+        }
+    }
+    return join(' ', @attrs);
 }
 
 ##== overriding methods of HTML::Parser
@@ -113,75 +117,75 @@ sub comment {
 }
 
 sub start {
-	my $self = shift @_;
+	my ($self, $tag, $attr_dict, $attr_names, $tag_text) = @_; 
 	my $page = $self->{'page'};
 	
 	#treat image files
-	if ($_[0] eq 'img'){
-		my $img_file =  $_[1] ->{'src'};
+	if ($tag eq 'img'){
+		my $img_file =  $attr_dict ->{'src'};
 		my $folder_name = $page->resource_folder_name;
-		$_[1]->{'src'} = $page->change_path($img_file, $folder_name, $folder_name);
-		my $tag_attrs = $self->build_attributes($_[1],$_[2]);
-		$_[3] = "<$_[0]"."$tag_attrs>";
+		$attr_dict->{'src'} = $page->change_path($img_file, $folder_name, $folder_name);
+		my $tag_attrs = $self->build_attributes($attr_dict, $attr_names);
+		$tag_text = "<$tag $tag_attrs>";
 	}
 	#background images
-	elsif ($_[0] eq 'body'){
-		if (exists($_[1]->{'background'})) {
-			my $img_file =  $_[1] ->{'background'};
+	elsif ($tag eq 'body'){
+		if (exists($attr_dict->{'background'})) {
+			my $img_file =  $attr_dict ->{'background'};
 			my $folder_name = $page->resource_folder_name;
-			$_[1]->{'background'} = $page->change_path($img_file, $folder_name, $folder_name);
-			my $tag_attrs = $self->build_attributes($_[1],$_[2]);
-			$_[3] = "<$_[0]"."$tag_attrs>";
+			$attr_dict->{'background'} = $page->change_path($img_file, $folder_name, $folder_name);
+			my $tag_attrs = $self->build_attributes($attr_dict, $attr_names);
+			$tag_text = "<$tag $tag_attrs>";
 		}
 	}
 	#linked stylesheet
-	elsif ($_[0] eq 'link') {
+	elsif ($tag eq 'link') {
 		#print Dumper(@_);
 		my $relation;
-		if (defined( $relation = ($_[1] ->{rel}) )){
+		if (defined( $relation = ($attr_dict ->{rel}) )){
 			$relation = lc $relation;
 			if ($relation eq 'stylesheet') {
-				my $styleSheetFile =  $_[1] ->{'href'};
+				my $styleSheetFile =  $attr_dict ->{'href'};
 				my $folder_name = $page->resource_folder_name;
-				$_[1]->{'href'} = $page->change_path($styleSheetFile, $folder_name, 'css');
-				my $tag_attrs = $self->build_attributes($_[1],$_[2]);
-				$_[3] = "<$_[0]"."$tag_attrs>";
+				$attr_dict->{'href'} = $page->change_path($styleSheetFile, $folder_name, 'css');
+				my $tag_attrs = $self->build_attributes($attr_dict, $attr_names);
+				$tag_text = "<$tag $tag_attrs>";
 			}
 		}
 	}
 	#frame
-	elsif ($_[0] eq 'frame') {
+	elsif ($tag eq 'frame') {
 		#print Dumper(@_);
-		my $page_source = $_[1] ->{'src'};
+		my $page_source = $attr_dict ->{'src'};
 		my $folder_name = $page->page_folder_name;
-		$_[1]->{'src'} = $page->change_path($page_source, $folder_name, 'page');
-		my $tag_attrs = $self->build_attributes($_[1],$_[2]);
-		$_[3] = "<$_[0]"."$tag_attrs>";
+		$attr_dict->{'src'} = $page->change_path($page_source, $folder_name, 'page');
+		my $tag_attrs = $self->build_attributes($attr_dict, $attr_names);
+		$tag_text = "<$tag $tag_attrs>";
 	}
 	#javascript
-	elsif ($_[0] eq 'script') {
-		if (exists($_[1]->{'src'})) {
-			my $scriptFile = $_[1]->{'src'};
+	elsif ($tag eq 'script') {
+		if (exists($attr_dict->{'src'})) {
+			my $scriptFile = $attr_dict->{'src'};
 			my $folder_name = $page->resource_folder_name;
-			$_[1]->{'src'} = $page->change_path($scriptFile, 
+			$attr_dict->{'src'} = $page->change_path($scriptFile, 
 									$folder_name, $folder_name);
-			my $tag_attrs = $self->build_attributes($_[1], $_[2]);
-			$_[3] = "<$_[0]"."$tag_attrs>";
+			my $tag_attrs = $self->build_attributes($attr_dict, $attr_names);
+			$tag_text = "<$tag $tag_attrs>";
 		}
 	}
 	#link
-	elsif ($_[0] eq 'a') {
-		if ( exists($_[1]->{'href'}) ) {
-			my $href =  $_[1]->{'href'};
+	elsif ($tag eq 'a') {
+		if ( exists($attr_dict->{'href'}) ) {
+			my $href =  $attr_dict->{'href'};
 			my $kind = 'page';
             if ($href !~ /^(http:|https:|ftp:|mailto:|help:|#)/ ){
                 if ($self->{'use_abs_link'}) {
-    				$_[1]->{href} = $self->{'page'}->build_abs_url($href);
+    				$attr_dict->{href} = $self->{'page'}->build_abs_url($href);
                  }
                  else {
     				my $folder_name = $page->page_folder_name;
     				if ($href =~/(.+)#(.*)/){
-    					$_[1]->{'href'} = $page->change_path($1, $folder_name, $kind)."#$2";
+    					$attr_dict->{'href'} = $page->change_path($1, $folder_name, $kind)."#$2";
     				}
     				else{
     					my @matchedSuffix = grep {$href =~ /\Q$_\E$/} @htmlSuffix;
@@ -189,16 +193,16 @@ sub start {
     						$folder_name = $page->resource_folder_name;
     						$kind = $folder_name;
     					}
-    					$_[1]->{'href'} = $page->change_path($href, $folder_name, $kind);
+    					$attr_dict->{'href'} = $page->change_path($href, $folder_name, $kind);
     				}
     			}
-				my $tag_attrs = $self->build_attributes($_[1],$_[2]);
-				$_[3] = "<$_[0]"."$tag_attrs>";
+				my $tag_attrs = $self->build_attributes($attr_dict, $attr_names);
+				$tag_text = "<$tag $tag_attrs>";
             }
 		}
 	}
     
-	$self->output($_[3]);
+	$self->output($tag_text);
 }
 
 1;
