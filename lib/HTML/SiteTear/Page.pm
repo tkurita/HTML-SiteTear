@@ -71,9 +71,9 @@ Copy $source_path into new linked path from $parent.
 =cut
 
 sub copy_to_linkpath {
-	#print "start copy_to_linkpath\n";
-	my ($self) = @_;
-	my $parentFile = $self->parent->target_path;
+    #print "start copy_to_linkpath\n";
+    my ($self) = @_;
+    my $parentFile = $self->parent->target_path;
 
 	my $filter;
 	if (defined $_filter_module) {
@@ -82,6 +82,7 @@ sub copy_to_linkpath {
 	else {
 		$filter = HTML::SiteTear::PageFilter->new($self);
 	}
+    
 	my $source_path = $self->source_path;
 	unless (-e $source_path) {
 		die("The file \"$source_path\" does not exists.\n");
@@ -92,22 +93,24 @@ sub copy_to_linkpath {
 	unless ($self->exists_in_copied_files($source_path)){
 		unless ($target_path 
 					= $self->item_in_filemap($source_path)) {
-			$target_path 
-				= File::Spec->rel2abs($self->linkpath, dirname($parentFile));
-		}
-		mkpath(dirname($target_path));
-		my $io = IO::File->new("> $target_path");
-		$target_path = Cwd::realpath($target_path);
-		$self->target_path($target_path);
-		$self->{'OUT'} = $io;
-		print "Copying HTML...\n";
-		print "from : $source_path\n";
-		print "to : $target_path\n\n";
-		$filter->parse_file;
-		$io->close;
-		$self->add_to_copyied_files($source_path);
-		$self->copy_linked_files;
-	}
+#			$target_path 
+#				= File::Spec->rel2abs($self->linkpath, dirname($parentFile));
+            $target_path = $self->link_uri->file;
+        }
+        
+        mkpath(dirname($target_path));
+        my $io = IO::File->new("> $target_path");
+        $target_path = Cwd::realpath($target_path);
+        $self->target_path($target_path);
+        $self->{'OUT'} = $io;
+        print "Copying HTML...\n";
+        print "from : $source_path\n";
+        print "to : $target_path\n\n";
+        $filter->parse_file;
+        $io->close;
+        $self->add_to_copyied_files($source_path);
+        $self->copy_linked_files;
+    }
 }
 
 sub set_binmode {
@@ -130,12 +133,22 @@ sub write_data {
 
 sub build_abs_url {
 	my ($self, $linkpath) = @_;
-    my $source_path = $self->source_path;
-	my $abs_path = File::Spec->rel2abs($linkpath, dirname($source_path) );
-	$abs_path = Cwd::realpath($abs_path);
-	my $rel_path = File::Spec->abs2rel($abs_path, $self->source_root->site_root_path);
-	my $abs_url = File::Spec->catfile($self->source_root->site_root_url, $rel_path);
-	return $abs_url;
+    my $link_uri = URI->new($linkpath);
+    if ($link_uri->scheme) {
+        return $linkpath;
+    }
+    
+    my $abs_uri = $link_uri->abs($self->source_uri);
+    my $rel_from_root = $abs_uri->rel($self->source_root->source_root_uri);
+    my $abs_in_site = $rel_from_root->abs($self->source_root->site_root_file_uri);
+    
+    return $abs_in_site->as_string;
+#    my $source_path = $self->source_path;
+#	my $abs_path = File::Spec->rel2abs($linkpath, dirname($source_path) );
+#	$abs_path = Cwd::realpath($abs_path);
+#	my $rel_path = File::Spec->abs2rel($abs_path, $self->source_root->site_root_path);
+#	my $abs_url = File::Spec->catfile($self->source_root->site_root_url, $rel_path);
+#	return $abs_url;
 }
 
 =head1 SEE ALOSO

@@ -9,20 +9,25 @@ use File::Copy;
 use File::Path;
 use Cwd;
 use Data::Dumper;
+use URI::file;
 
 use base qw(Class::Accessor);
-HTML::SiteTear::Item->mk_accessors(qw(linkpath
-									source_path
-									target_path
-									kind
-									parent
-                                    source_root));
+__PACKAGE__->mk_accessors(qw(linkpath
+                            link_uri
+                            source_path
+                            source_uri
+                            base_uri
+                            target_path
+                            target_uri
+                            kind
+                            parent
+                            source_root));
 
 require HTML::SiteTear::Page;
 require HTML::SiteTear::CSS;
 
 
-our $VERSION = '1.30';
+our $VERSION = '1.31';
 
 =head1 NAME
 
@@ -55,10 +60,14 @@ Make an instance of this moduel. $parent must be an instance of HTML::SiteTear::
 =cut
 
 sub new {
-	my $class = shift @_;
-	my %args = @_;
-	my $self = $class->SUPER::new(\%args);
+    my $class = shift @_;
+    my %args = @_;
+    my $self = $class->SUPER::new(\%args);
     $self->source_root($self->parent->source_root);
+    if (exists $args{'source_path'}) {
+        $self->source_path($self->source_path);
+    }
+    
     return $self;
 }
 
@@ -81,8 +90,9 @@ sub copy_to_linkpath {
 
 		my $target_path;
 		unless ($target_path = $self->item_in_filemap($source_path)) {
-			my $parent_file = $self->parent->target_path;
-			$target_path = File::Spec->rel2abs($self->linkpath, dirname($parent_file));
+#			my $parent_file = $self->parent->target_path;
+#			$target_path = File::Spec->rel2abs($self->linkpath, dirname($parent_file));
+            $target_path = $self->link_uri->file;
 		}
 		
 		print "Copying asset...\n";
@@ -91,7 +101,7 @@ sub copy_to_linkpath {
 		mkpath(dirname($target_path));
 		copy($source_path, $target_path);
 		$self->add_to_copyied_files($source_path);
-		$self->target_path(  Cwd::realpath($target_path) );
+		$self->target_path(Cwd::abs_path($target_path));
 	}
 }
 
@@ -117,67 +127,72 @@ make a new link path from a link path($linkpath) in $source_path. $folder_name i
 =cut
 
 sub change_path {
-#	print STDERR "start change_path\n";
-	my ($self, $linkpath, $folder_name, $kind) = @_;
-	my $result_path;
-	unless (defined($kind)){
-		$kind = $folder_name;
-	}
-
-	if (File::Spec->file_name_is_absolute($linkpath)) {
-		return $linkpath;
-	}
+    #print STDERR "start change_path\n";
+    my ($self, $linkpath, $folder_name, $kind) = @_;
+    my $result_path;
     
-	my $abs_src_path = File::Spec->rel2abs($linkpath, dirname($self->source_path) );
-    unless (-e $abs_src_path) {
-        warn("$abs_src_path is not found.\nThe link to this path is not changed.\n");
+    my $uri = URI->new($linkpath);
+    if (($uri->scheme) and ($uri->scheme ne 'file')) {
         return $linkpath;
     }
     
-	$abs_src_path = Cwd::realpath($abs_src_path);
+    unless (defined($kind)){
+        $kind = $folder_name;
+    }
 
-	## sourceRoot 以下にあるかどうかを判定するために sourceRoot からの相対パスを求める。
-	
-	my $rel_from_root = File::Spec->abs2rel($abs_src_path, dirname($self->source_root_path));
-	if ($self->exists_in_filemap($abs_src_path) ) {
-		$result_path = $self->rel_for_mappedfile($abs_src_path, dirname($self->target_path) );
-	}
-	else {
-		my $new_linked_obj;
-		my %args = ('parent' => $self,
-					'source_path' => $abs_src_path,
-					'kind' => $kind);
-		if ($kind eq 'page') {
-			$new_linked_obj = HTML::SiteTear::Page->new(%args);
-		}
-		elsif ($kind eq 'css') {
-			$new_linked_obj = HTML::SiteTear::CSS->new(%args);
-		}
-		else {
-			$new_linked_obj = HTML::SiteTear::Item->new(%args);
-		}
-	
-		my $new_linkpath;
-		my $updir_str = File::Spec->updir();
-	
-		if ($rel_from_root =~ /^\Q$updir_str\E/) {
-			## sourceRoot 以下に無い場合
-			my $file_name = basename($linkpath);
-			$new_linkpath = "$folder_name/".$file_name;
-	
-		}
-		else { # sourceRoot 以下にある場合は リンクするパスを変更しない。
-			$new_linkpath = $linkpath;
-		}
-	
-		$new_linked_obj->linkpath( $new_linkpath );
-		$self->add_to_linked_files($new_linked_obj);
-		my $target_path = File::Spec->rel2abs($new_linkpath, dirname($self->target_path));
-		$self->add_to_filemap($abs_src_path, $target_path);
-		$result_path = $new_linkpath;
-	}
-	#print "end of change_path\n";
-	return $result_path
+    $uri = $uri->abs($self->base_uri);
+    my $abs_path = $uri->file;
+    unless (-e $abs_path) {
+        warn("$abs_path is not found.\nThe link to this path is not changed.\n");
+        return $linkpath;
+    }
+    
+    $abs_path = Cwd::abs_path($abs_path);
+    
+    ## obtain relative path from sourceRoot to judge $abs_src_path is under sourceRoot or not.
+    my $rel_from_root = File::Spec->abs2rel($abs_path, dirname($self->source_root_path));
+    if ($self->exists_in_filemap($abs_path) ) {
+        $result_path 
+           = $self->rel_for_mappedfile($abs_path, dirname($self->target_path) );
+
+    } else {
+        my $new_linked_obj;
+        my %args = ('parent' => $self,
+                    'source_path' => $abs_path,
+                    'kind' => $kind);
+        if ($kind eq 'page') {
+            $new_linked_obj = HTML::SiteTear::Page->new(%args);
+
+        } elsif ($kind eq 'css') {
+            $new_linked_obj = HTML::SiteTear::CSS->new(%args);
+
+        } else {
+            $new_linked_obj = HTML::SiteTear::Item->new(%args);
+        }
+
+        my $updir_str = File::Spec->updir();
+        
+        my $new_link_uri;
+        if ($rel_from_root =~ /^\Q$updir_str\E/) {
+            ## not under sourceRoot
+            my $file_name = basename($abs_path);
+            $new_link_uri = URI->new("$folder_name/$file_name");
+            
+        } else { # when under sourceRoot, linpath is not changed.
+            $new_link_uri = URI->new($linkpath);
+        }
+        
+        $result_path = $new_link_uri->as_string;
+        $new_linked_obj->linkpath($result_path);
+        my $link_uri = $new_link_uri->abs($self->target_uri);
+        $new_linked_obj->link_uri($link_uri);
+        
+        $self->add_to_linked_files($new_linked_obj);
+        my $target_path = $link_uri->file;
+        $self->add_to_filemap($abs_path, $target_path);
+    }
+    #print "end of change_path\n";
+    return $result_path
 }
 
 =head2 copy_linked_files
@@ -304,14 +319,45 @@ sub rel_for_mappedfile {
     $item->source_path;
     $item->source_path($path);
 
-Get ang set the source path of this objcet.
+Get and set the source path of this objcet.
+
+=cut
+
+sub source_path {
+    my $self = shift @_;
+    
+    if (@_) {
+        my $path = Cwd::abs_path($_[0]);
+        $self->{'source_path'} = $path;
+        my $uri = URI::file->new($path);
+        $self->source_uri($uri);
+        $self->base_uri($uri);
+    }
+    
+    return $self->{'source_path'};
+}
 
 =head2 target_path
 
     $item->taget_path;
     $item->target_path($path);
 
-Get and set the target path which is the copy destination of $source_path. This method is called from "copy_to_linkpath()".
+Get and set the target path which is the copy destination of $source_path. This method is called from "copy_to_linkpath()". Before calling this method, $path must be exists.
+
+=cut
+
+sub target_path {
+    my $self = shift @_;
+    
+    if (@_) {
+        my $path = $_[0];
+        $self->{'target_path'} = $path;
+        my $uri = URI::file->new($path);
+        $self->target_uri($uri);
+    }
+    
+    return $self->{'target_path'};
+}
 
 =head2 linkpath
 

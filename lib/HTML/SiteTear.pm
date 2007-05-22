@@ -5,9 +5,10 @@ use strict;
 use warnings;
 use File::Basename;
 use File::Spec;
+use Cwd;
 use Carp;
 use base qw(Class::Accessor);
-HTML::SiteTear->mk_accessors( qw(source_path
+__PACKAGE__->mk_accessors( qw(source_path
                                  site_root_path
                                  site_root_url
                                  target_path) );
@@ -49,15 +50,16 @@ Make an instance of this module. The path to source HTML file "$source_path" is 
 =cut
 
 sub new {
-	my $class = shift @_;
+    my $class = shift @_;
     my $self;
     if (@_ == 1) {
         $self = bless {'source_path' => shift @_}, $class;
-    }
-    else {
+
+    } else {
         my %args = @_;
         $self = $class->SUPER::new(\%args);
     }
+    
     $self->source_path or croak "source_path is not specified.\n";
     (-e $self->source_path) or croak $self->source_path." is not found.\n";
 
@@ -88,12 +90,14 @@ sub copy_to {
                                                basename($source_path));
         }
     }
+    
     $self->target_path($destination_path);
     my $root = HTML::SiteTear::Root->new(%$self);
     my $new_source_page = HTML::SiteTear::Page->new(
-										'parent' => $root,
-										'source_path' => $source_path);
+                                        'parent' => $root,
+                                        'source_path' => $source_path);
     $new_source_page->linkpath( basename($destination_path) );
+    $new_source_page->link_uri(URI::file->new(Cwd::abs_path($destination_path)));
     $new_source_page->copy_to_linkpath;
     return $new_source_page;
 }
@@ -133,11 +137,5 @@ To indicate links should be conveted to absolute links, enclose links in HTML fi
 Tetsuro KURITA <tkurita@mac.com>
 
 =cut
-
-##== obsolute
-
-sub copyTo {
-	return copy_to(@_);
-}
 
 1;

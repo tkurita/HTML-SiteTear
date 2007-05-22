@@ -5,13 +5,16 @@ use warnings;
 use File::Spec;
 use File::Basename;
 use Cwd;
+use URI::file;
 use base qw(Class::Accessor);
 HTML::SiteTear::Root->mk_accessors(qw(source_path
+                                    source_root_uri
 									resource_folder_name
 									page_folder_name
 									target_path
                                     site_root_path
-                                    site_root_url
+                                    site_root_file_uri
+                                    site_root_uri
                                     allow_abs_link));
 #use Data::Dumper;
 
@@ -47,21 +50,26 @@ make a new instance.
 
 =cut
 sub new {
-	my $class = shift @_;
-	my %args = @_;
-	my $self = $class->SUPER::new(\%args);
-	$self->{'fileMapRef'} = {};
-	$self->{'copiedFiles'} = [];
-	$self->set_default_folder_names;
-    $self->allow_abs_link($self->site_root_path and $self->site_root_url);
+    my $class = shift @_;
+    my %args = @_;
+    my $self = $class->SUPER::new(\%args);
+    $self->{'fileMapRef'} = {};
+    $self->{'copiedFiles'} = [];
+    $self->set_default_folder_names;
     
-	return $self;
+    if ($self->site_root_path and $self->site_root_uri) {
+        $self->allow_abs_link(1);
+        $self->site_root_file_uri(URI::file->new($self->site_root_path));
+        $self->site_root_uri(URI->new($self->site_root_uri));
+    }
+    $self->source_root_uri(URI::file->new($self->source_path));
+    return $self;
 }
 
 sub set_default_folder_names {
-	my ($self) = @_;
-	$self->resource_folder_name($defaultresource_folder_name);
-	$self->page_folder_name($defaultpage_folder_name);
+    my ($self) = @_;
+    $self->resource_folder_name($defaultresource_folder_name);
+    $self->page_folder_name($defaultpage_folder_name);
 }
 
 =head2 add_to_copyied_files
@@ -127,6 +135,7 @@ sub item_in_filemap {
 get relative path of copied file of $sourceFile from $base.
 
 =cut
+
 sub rel_for_mappedfile {
 	my ($self, $source_path, $base) = @_;
 	my $destination_path = ($self->{'fileMapRef'}->{$source_path});

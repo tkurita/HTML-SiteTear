@@ -92,8 +92,9 @@ sub copy_to_linkpath {
 		
 		my $target_path;
 		unless ($target_path = $self->item_in_filemap($source_path)) {
-			my $parent_file = $self->{'parent'}->target_path;
-			$target_path = File::Spec->rel2abs($self->linkpath, dirname($parent_file));
+#			my $parent_file = $self->{'parent'}->target_path;
+#			$target_path = File::Spec->rel2abs($self->linkpath, dirname($parent_file));
+#####            $target_path = $self->link_uri->file
 		}
 
 		print "Copying asset...\n";
