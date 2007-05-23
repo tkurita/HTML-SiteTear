@@ -149,7 +149,8 @@ sub change_path {
     
     $abs_path = Cwd::abs_path($abs_path);
     
-    ## obtain relative path from sourceRoot to judge $abs_src_path is under sourceRoot or not.
+    ## obtain relative path from sourceRoot 
+    ## to judge whether $abs_src_path is under sourceRoot or not.
     my $rel_from_root = File::Spec->abs2rel($abs_path, dirname($self->source_root_path));
     if ($self->exists_in_filemap($abs_path) ) {
         $result_path 
@@ -175,8 +176,12 @@ sub change_path {
         my $new_link_uri;
         if ($rel_from_root =~ /^\Q$updir_str\E/) {
             ## not under sourceRoot
-            my $file_name = basename($abs_path);
-            $new_link_uri = URI->new("$folder_name/$file_name");
+            if ($self->source_root->only_subitems) {
+                $new_link_uri = $uri->rel($self->target_uri);
+            } else {
+                my $file_name = basename($abs_path);
+                $new_link_uri = URI->new("$folder_name/$file_name");
+            }
             
         } else { # when under sourceRoot, linpath is not changed.
             $new_link_uri = URI->new($linkpath);
