@@ -47,19 +47,19 @@ $parent is an instance of HTML::SiteTear::Page which have an link to $source_pat
 =cut
 
 sub new {
-	my $class = shift @_;
-	my $self = $class->SUPER::new(@_);
-	unless ($self->kind ) { $self->kind('page') };
-	$self ->{'linkedFiles'} = [];
-	return $self;
+    my $class = shift @_;
+    my $self = $class->SUPER::new(@_);
+    unless ($self->kind ) { $self->kind('page') };
+    $self ->{'linkedFiles'} = [];
+    return $self;
 }
 
 our $_filter_module;
 
 sub page_filter {
-	my ($class, $module) = @_;
-	$_filter_module = $module;
-	return eval "require $_filter_module";
+    my ($class, $module) = @_;
+    $_filter_module = $module;
+    return eval "require $_filter_module";
 }
 
 =head2 copy_to_linkpath
@@ -75,26 +75,25 @@ sub copy_to_linkpath {
     my ($self) = @_;
     my $parentFile = $self->parent->target_path;
 
-	my $filter;
-	if (defined $_filter_module) {
-		$filter = $_filter_module->new($self);
-	}
-	else {
-		$filter = HTML::SiteTear::PageFilter->new($self);
-	}
+    my $filter;
+    if (defined $_filter_module) {
+        $filter = $_filter_module->new($self);
+    }
+    else {
+        $filter = HTML::SiteTear::PageFilter->new($self);
+    }
     
-	my $source_path = $self->source_path;
-	unless (-e $source_path) {
-		die("The file \"$source_path\" does not exists.\n");
-		return 0;
-	}
-	
-	my $target_path;
-	unless ($self->exists_in_copied_files($source_path)){
-		unless ($target_path 
-					= $self->item_in_filemap($source_path)) {
-#			$target_path 
-#				= File::Spec->rel2abs($self->linkpath, dirname($parentFile));
+    my $source_path = $self->source_path;
+    unless (-e $source_path) {
+        die("The file \"$source_path\" does not exists.\n");
+        return 0;
+    }
+
+    unless ($self->exists_in_copied_files($source_path)){
+        my $target_path;
+        if (my $target_uri = $self->item_in_filemap($source_path)) {
+            $target_path = $target_uri->file;
+        } else {
             $target_path = $self->link_uri->file;
         }
         
@@ -106,6 +105,7 @@ sub copy_to_linkpath {
         print "Copying HTML...\n";
         print "from : $source_path\n";
         print "to : $target_path\n\n";
+        ($source_path eq $target_path) and die "source and target is same file.\n";
         $filter->parse_file;
         $io->close;
         $self->add_to_copyied_files($source_path);
@@ -114,8 +114,8 @@ sub copy_to_linkpath {
 }
 
 sub set_binmode {
-	my ($self, $io_layer) = @_;
-	binmode($self->{'OUT'}, $io_layer);
+    my ($self, $io_layer) = @_;
+    binmode($self->{'OUT'}, $io_layer);
 }
 
 =head2 write_data
@@ -127,12 +127,12 @@ Write HTML data to the linked path form the parent object. This method is called
 =cut
 
 sub write_data {
-	my ($self, $data) = @_;
-	$self->{'OUT'}->print($data);
+    my ($self, $data) = @_;
+    $self->{'OUT'}->print($data);
 }
 
 sub build_abs_url {
-	my ($self, $linkpath) = @_;
+    my ($self, $linkpath) = @_;
     my $link_uri = URI->new($linkpath);
     if ($link_uri->scheme) {
         return $linkpath;
@@ -144,11 +144,11 @@ sub build_abs_url {
     
     return $abs_in_site->as_string;
 #    my $source_path = $self->source_path;
-#	my $abs_path = File::Spec->rel2abs($linkpath, dirname($source_path) );
-#	$abs_path = Cwd::realpath($abs_path);
-#	my $rel_path = File::Spec->abs2rel($abs_path, $self->source_root->site_root_path);
-#	my $abs_url = File::Spec->catfile($self->source_root->site_root_url, $rel_path);
-#	return $abs_url;
+#    my $abs_path = File::Spec->rel2abs($linkpath, dirname($source_path) );
+#    $abs_path = Cwd::realpath($abs_path);
+#    my $rel_path = File::Spec->abs2rel($abs_path, $self->source_root->site_root_path);
+#    my $abs_url = File::Spec->catfile($self->source_root->site_root_url, $rel_path);
+#    return $abs_url;
 }
 
 =head1 SEE ALOSO

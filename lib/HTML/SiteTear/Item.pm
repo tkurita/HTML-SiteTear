@@ -80,29 +80,30 @@ Copy $source_path into new linked path from $parent.
 =cut
 
 sub copy_to_linkpath {
-	my ($self) = @_;
-	my $source_path = $self->source_path;
-	unless ($self->exists_in_copied_files($source_path)) {
-		unless (-e $source_path) {
-			die("The file \"$source_path\" does not exists.\n");
-			return;
-		}
+    my ($self) = @_;
+    my $source_path = $self->source_path;
+    unless ($self->exists_in_copied_files($source_path)) {
+        unless (-e $source_path) {
+            die("The file \"$source_path\" does not exists.\n");
+            return;
+        }
 
-		my $target_path;
-		unless ($target_path = $self->item_in_filemap($source_path)) {
-#			my $parent_file = $self->parent->target_path;
-#			$target_path = File::Spec->rel2abs($self->linkpath, dirname($parent_file));
+        my $target_path;
+        if (my $target_uri = $self->item_in_filemap($source_path)) {
+            $target_path = $target_uri->file;
+        } else {
             $target_path = $self->link_uri->file;
-		}
-		
-		print "Copying asset...\n";
-		print "from : $source_path\n";
-		print "to : $target_path\n\n";
-		mkpath(dirname($target_path));
-		copy($source_path, $target_path);
-		$self->add_to_copyied_files($source_path);
-		$self->target_path(Cwd::abs_path($target_path));
-	}
+        }
+        
+        print "Copying asset...\n";
+        print "from : $source_path\n";
+        print "to : $target_path\n\n";
+        ($source_path eq $target_path) and die "source and target is same file.\n";
+        mkpath(dirname($target_path));
+        copy($source_path, $target_path);
+        $self->add_to_copyied_files($source_path);
+        $self->target_path(Cwd::abs_path($target_path));
+    }
 }
 
 =head2 add_to_linked_files
@@ -114,8 +115,8 @@ Add $linked_obj into the internal list. in $linked_obj is an instance of HTML::S
 =cut
 
 sub add_to_linked_files {
-	my ($self, $linked_obj) = @_;
-	push (@{$self->{'linkedFiles'}}, $linked_obj);
+    my ($self, $linked_obj) = @_;
+    push (@{$self->{'linkedFiles'}}, $linked_obj);
 }
 
 =head2 change_path
@@ -147,16 +148,14 @@ sub change_path {
         return $linkpath;
     }
     
-    $abs_path = Cwd::abs_path($abs_path);
+    $abs_path = Cwd::realpath($abs_path);
     
-    ## obtain relative path from sourceRoot 
-    ## to judge whether $abs_src_path is under sourceRoot or not.
-    my $rel_from_root = File::Spec->abs2rel($abs_path, dirname($self->source_root_path));
     if ($self->exists_in_filemap($abs_path) ) {
         $result_path 
-           = $self->rel_for_mappedfile($abs_path, dirname($self->target_path) );
+           = $self->rel_for_mappedfile($abs_path, $self->target_uri);
 
     } else {
+
         my $new_linked_obj;
         my %args = ('parent' => $self,
                     'source_path' => $abs_path,
@@ -171,13 +170,18 @@ sub change_path {
             $new_linked_obj = HTML::SiteTear::Item->new(%args);
         }
 
+        ## obtain relative path from source_root 
+        ## to judge whether $abs_path is under sourceRoot or not.
+        my $rel_from_root = File::Spec->abs2rel($abs_path, dirname($self->source_root_path));
         my $updir_str = File::Spec->updir();
         
         my $new_link_uri;
+        my $should_copy = 1;
         if ($rel_from_root =~ /^\Q$updir_str\E/) {
             ## not under sourceRoot
             if ($self->source_root->only_subitems) {
                 $new_link_uri = $uri->rel($self->target_uri);
+                $should_copy = 0;
             } else {
                 my $file_name = basename($abs_path);
                 $new_link_uri = URI->new("$folder_name/$file_name");
@@ -189,12 +193,12 @@ sub change_path {
         
         $result_path = $new_link_uri->as_string;
         $new_linked_obj->linkpath($result_path);
-        my $link_uri = $new_link_uri->abs($self->target_uri);
-        $new_linked_obj->link_uri($link_uri);
+        my $target_uri = $new_link_uri->abs($self->target_uri);
+        $new_linked_obj->link_uri($target_uri);
         
-        $self->add_to_linked_files($new_linked_obj);
-        my $target_path = $link_uri->file;
-        $self->add_to_filemap($abs_path, $target_path);
+        $self->add_to_linked_files($new_linked_obj) if $should_copy;
+        #my $target_path = $link_uri->file;
+        $self->add_to_filemap($abs_path, $target_uri);
     }
     #print "end of change_path\n";
     return $result_path
@@ -209,23 +213,23 @@ Call method "copy_to_linkpath()" of every object added by "addToLikedFiles($link
 =cut
 
 sub copy_linked_files {
-	my ($self) = @_;
-	my @page_list = (); 
+    my ($self) = @_;
+    my @page_list = (); 
 
-	foreach my $linked_file (@{$self->{'linkedFiles'}}) {
-		if ($linked_file->kind eq 'page') {
-			push @page_list, $linked_file; 
-		}
-		else {
-			$linked_file->copy_to_linkpath();
-		}
-	}
+    foreach my $linked_file (@{$self->{'linkedFiles'}}) {
+        if ($linked_file->kind eq 'page') {
+            push @page_list, $linked_file; 
+        }
+        else {
+            $linked_file->copy_to_linkpath();
+        }
+    }
   
-	#HTML file must be copied after other assets.
-	unless (@page_list) {return};
-	foreach my $linked_file (@page_list) {
-		$linked_file->copy_to_linkpath();
-	}
+    #HTML file must be copied after other assets.
+    unless (@page_list) {return};
+    foreach my $linked_file (@page_list) {
+        $linked_file->copy_to_linkpath();
+    }
 }
 
 
@@ -240,8 +244,8 @@ Add a file path already copied to the copiedFiles table of the root object of th
 =cut
 
 sub add_to_copyied_files {
-	my ($self, $path) = @_;
-	$self->parent->add_to_copyied_files($path);
+    my ($self, $path) = @_;
+    $self->parent->add_to_copyied_files($path);
 }
 
 =head2 exists_in_copied_files
@@ -253,8 +257,8 @@ Check existance of $source_path in the copiedFiles entry.
 =cut
 
 sub exists_in_copied_files {
-	my ($self, $path) = @_;
-	return $self->parent->exists_in_copied_files($path);
+    my ($self, $path) = @_;
+    return $self->parent->exists_in_copied_files($path);
 }
 
 =head2 add_to_filemap
@@ -266,8 +270,8 @@ Add a relation between $source_path and $target_path to the internal table of th
 =cut
 
 sub add_to_filemap {
-	my ($self, $source_path, $target_path) = @_;
-	$self->parent->add_to_filemap($source_path, $target_path);
+    my ($self, $source_path, $target_path) = @_;
+    $self->parent->add_to_filemap($source_path, $target_path);
 }
 
 =head2 exists_in_filemap
@@ -279,15 +283,15 @@ Check existance of $source_path in the internal table the root object of parent 
 =cut
 
 sub exists_in_filemap{
-	my ($self, $path) = @_;
-	#return $self->parent->exists_in_filemap($path);
+    my ($self, $path) = @_;
+    #return $self->parent->exists_in_filemap($path);
     return $self->source_root->exists_in_filemap($path);
 }
 
 
 sub item_in_filemap {
-	my ($self, $path) = @_;
-	#return $self->parent->item_in_filemap($path);
+    my ($self, $path) = @_;
+    #return $self->parent->item_in_filemap($path);
     return $self->source_root->item_in_filemap($path);
 }
 
@@ -300,21 +304,21 @@ Get the root source path which is an argument of HTML::SiteTear::CopyTo.
 =cut
 
 sub source_root_path {
-	my ($self) = @_;
-	return $self->source_root->source_path;
+    my ($self) = @_;
+    return $self->source_root->source_path;
 }
 
 =head2 rel_for_mappedfile
 
-    $relativePath = $item->rel_for_mappedfile($source_path, $base);
+    $relativePath = $item->rel_for_mappedfile($source_path, $base_uri);
 
-Get a relative path of the target path corresponding to $sourcePash based from $base.
+Get a relative link of the target path corresponding to $source_path based from $base_uri.
 
 =cut
 
 sub rel_for_mappedfile {
-  my ($self, $source_path, $base) = @_;
-  return $self->parent->rel_for_mappedfile($source_path, $base);
+  my ($self, $source_path, $base_uri) = @_;
+  return $self->parent->rel_for_mappedfile($source_path, $base_uri);
 }
 
 ##== accessors
@@ -381,18 +385,18 @@ Get and set name of a folder to store HTML files linked from $source_path. If $i
 =cut
 
 sub page_folder_name {
-	my $self =  shift @_;
-	
-	if (@_) {
-		return $self->{'page_folder_name'} = shift @_;
-	}
-	
-	if (exists $self->{'page_folder_name'}) {
-		return $self->{'page_folder_name'};
-	}
-	else {
-		return $self->parent->page_folder_name;
-	}
+    my $self =  shift @_;
+    
+    if (@_) {
+        return $self->{'page_folder_name'} = shift @_;
+    }
+    
+    if (exists $self->{'page_folder_name'}) {
+        return $self->{'page_folder_name'};
+    }
+    else {
+        return $self->parent->page_folder_name;
+    }
 }
 
 =head2 resource_folder_name
@@ -405,18 +409,18 @@ Get and set name of a folder to store not HTML files(javascript, image, CSS) lin
 =cut
 
 sub resource_folder_name {
-	my $self = shift @_;
-	
-	if (@_) {
-		return $self->{'resource_folder_name'} = shift @_;
-	}
-	
-	if (exists $self->{'resource_folder_name'}) {
-		return $self->{'resource_folder_name'};
-	}
-	else {
-		return $self->parent->resource_folder_name;
-	}
+    my $self = shift @_;
+    
+    if (@_) {
+        return $self->{'resource_folder_name'} = shift @_;
+    }
+    
+    if (exists $self->{'resource_folder_name'}) {
+        return $self->{'resource_folder_name'};
+    }
+    else {
+        return $self->parent->resource_folder_name;
+    }
 }
 
 =head1 SEE ALSO

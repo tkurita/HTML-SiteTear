@@ -41,12 +41,11 @@ Make an instance of this moduel. The parent object "$parent" must be an instance
 =cut
 
 sub new {
-	my $class = shift @_;
-	my $self = $class->SUPER::new(@_);
-	unless ($self->kind ) { $self->kind('css') };
-	#$self = bless $self, $class;
-	$self->{'linkedFiles'} = [];
-	return $self;
+    my $class = shift @_;
+    my $self = $class->SUPER::new(@_);
+    unless ($self->kind ) { $self->kind('css') };
+    $self->{'linkedFiles'} = [];
+    return $self;
 }
 
 =head2 css_copy
@@ -58,19 +57,19 @@ Copy a cascading style sheet file "$source_path" into $target_path dealing with 
 =cut
 
 sub css_copy {
-	my ($self, $target_path) = @_;
-	my $source_path = $self->source_path;
-	open(my $CSSIN, "< $source_path");
-	open(my $CSSOUT, "> $target_path");
-	while (my $a_line = <$CSSIN>) {
-		if ($a_line =~ /url\(([^()]+)\)/) {
-			my $new_link = $self->change_path($1, $self->resource_folder_name, 'css');
-			$a_line =~ s/url\([^()]+\)/url\($new_link\)/;
-		}
-		print $CSSOUT $a_line;
-	}
-	close($CSSIN);
-	close($CSSOUT);
+    my ($self, $target_path) = @_;
+    my $source_path = $self->source_path;
+    open(my $CSSIN, "< $source_path");
+    open(my $CSSOUT, "> $target_path");
+    while (my $a_line = <$CSSIN>) {
+        if ($a_line =~ /url\(([^()]+)\)/) {
+            my $new_link = $self->change_path($1, $self->resource_folder_name, 'css');
+            $a_line =~ s/url\([^()]+\)/url\($new_link\)/;
+        }
+        print $CSSOUT $a_line;
+    }
+    close($CSSIN);
+    close($CSSOUT);
 }
 
 =head2 copy_to_linkpath
@@ -82,31 +81,32 @@ Copy $source_path into new linked path from $parent.
 =cut
 
 sub copy_to_linkpath {
-	my ($self) = @_;
-	my $source_path = $self->source_path;
-	unless ($self->exists_in_copied_files($source_path)) {
-		unless (-e $source_path) {
-			die("The file \"$source_path\" does not exists.\n");
-			return;
-		}
-		
-		my $target_path;
-		unless ($target_path = $self->item_in_filemap($source_path)) {
-#			my $parent_file = $self->{'parent'}->target_path;
-#			$target_path = File::Spec->rel2abs($self->linkpath, dirname($parent_file));
-#####            $target_path = $self->link_uri->file
-		}
+    my ($self) = @_;
+    my $source_path = $self->source_path;
+    unless ($self->exists_in_copied_files($source_path)) {
+        unless (-e $source_path) {
+            die("The file \"$source_path\" does not exists.\n");
+            return;
+        }
+        
+        my $target_path;
+        if (my $target_uri = $self->item_in_filemap($source_path)) {
+            $target_path = $target_uri->file;
+        } else {
+            $target_path = $self->link_uri->file
+        }
 
-		print "Copying asset...\n";
-		print "from : $source_path\n";
-		print "to : $target_path\n\n";
-		mkpath(dirname($target_path));
-		$self->target_path($target_path); #temporary set for css_copy
-		$self->css_copy($target_path);
-		$self->target_path(Cwd::realpath($target_path));
-		$self->add_to_copyied_files($source_path);
-		$self->copy_linked_files;
-	}
+        print "Copying asset...\n";
+        print "from : $source_path\n";
+        print "to : $target_path\n\n";
+        ($source_path eq $target_path) and die "source and target is same file.\n";
+        mkpath(dirname($target_path));
+        $self->target_path($target_path); #temporary set for css_copy
+        $self->css_copy($target_path);
+        $self->target_path(Cwd::realpath($target_path));
+        $self->add_to_copyied_files($source_path);
+        $self->copy_linked_files;
+    }
 }
 
 =head1 SEE ALSO

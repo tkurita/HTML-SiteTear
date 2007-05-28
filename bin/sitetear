@@ -15,15 +15,15 @@ our $VERSION = '1.30';
 	my $help = 0;
 	my $filter;
 	my $site_root_path = '';
-    my $site_root_url = '';
+    my $site_root_uri = '';
     
-	GetOptions('help|?' => \$help, man => \$man,
+    GetOptions('help|?' => \$help, man => \$man,
                 'siteroot=s' => \$site_root_path,
-                'rooturl=s' => \$site_root_url,
+                'rooturi=s' => \$site_root_uri,
                 'F=s'=>\$filter) or pod2usage(2);
 
-	pod2usage(-exitstatus => 0, -verbose => 1) if $help;
-	pod2usage(-exitstatus => 0, -verbose => 2) if $man;
+    pod2usage(-exitstatus => 0, -verbose => 1) if $help;
+    pod2usage(-exitstatus => 0, -verbose => 2) if $man;
     
 	if (@ARGV > 2) {
 		pod2usage(-message => 'Too many arguments.', 
@@ -35,15 +35,16 @@ our $VERSION = '1.30';
 			  -exitstatus => 1, -verbose => 1)
 	}
 
-	my ($source_path, $target_path) = @ARGV;
+    my ($source_path, $target_path) = @ARGV;
     
-	my $siteTear = HTML::SiteTear->new('source_path' => $source_path,
+    my $siteTear = HTML::SiteTear->new('source_path' => $source_path,
                                     'site_root_path' => $site_root_path,
-                                    'site_root_url' => $site_root_url);
-	if ($filter) {
-		$siteTear->page_filter($filter);
-	}
-	$siteTear->copy_to($target_path);
+                                    'site_root_uri' => $site_root_uri);
+    if ($filter) {
+    	$siteTear->page_filter($filter);
+    }
+    
+    $siteTear->copy_to($target_path);
 }
 
 1;
@@ -81,9 +82,9 @@ Prints the manual page and exits.
 
 The root path of the web site including SOURCE
 
-=item --rooturl
+=item --rooturi
 
-The URL of the root path of the web site including SOURCE
+The URI of the root path of the web site including SOURCE
 
 =back
 
