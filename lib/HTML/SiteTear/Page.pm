@@ -140,6 +140,10 @@ sub build_abs_url {
     my $abs_uri = $link_uri->abs($self->source_uri);
     my $rel_from_root = $abs_uri->rel($self->source_root->site_root_file_uri);
     my $abs_in_site = $rel_from_root->abs($self->source_root->site_root_uri);
+    print "Converting to absolute link...\n";
+    print "from a link ".$link_uri."\n";
+    print "in ".$self->source_path."\n";
+    print "into ".$abs_in_site->as_string."\n\n";
     return $abs_in_site->as_string;
 #    my $source_path = $self->source_path;
 #    my $abs_path = File::Spec->rel2abs($linkpath, dirname($source_path) );
