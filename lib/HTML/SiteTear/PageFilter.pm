@@ -16,7 +16,7 @@ __PACKAGE__->mk_accessors(qw(has_remote_base
 
 use HTML::Copy;
 
-our $VERSION = '1.31';
+our $VERSION = '1.40';
 our @htmlSuffix = qw(.html .htm);
 
 =head1 NAME
@@ -44,6 +44,7 @@ This module is to change link pathes in HTML files. It's a sub class of L<HTML::
 Make an instance of this moduel. $parent must be an instance of HTML::SiteTear::Root or HTML::SiteTear::Page. This method is called from $parent.
 
 =cut
+
 sub new {
     my ($class, $page) = @_;
     my $parent = $class->SUPER::new();
@@ -85,20 +86,6 @@ sub output {
   my ($self, $data) = @_;
   $self->page->write_data($data);
 }
-
-#sub build_attributes{
-#    my ($self, $attr_dict, $attr_names) = @_;
-#    my @attrs = ();
-#    foreach my $attr_name (@{$attr_names}) {
-#        if ($attr_name eq '/') {
-#            push @attrs, '/';
-#        } else {
-#            my $attr_value = $attr_dict->{$attr_name};
-#            push @attrs, "$attr_name=\"$attr_value\"";
-#        }
-#    }
-#    return join(' ', @attrs);
-#}
 
 ##== overriding methods of HTML::Parser
 
@@ -157,40 +144,17 @@ sub start {
         }
         
     } elsif ($tag eq 'img') {
-#        my $img_file =  $attr_dict ->{'src'};
-#        my $folder_name = $page->resource_folder_name;
-#        $attr_dict->{'src'} = $page->change_path($img_file, $folder_name, $folder_name);
-#        my $tag_attrs = HTML::Copy->build_attributes($attr_dict, $attr_names);
         if (my $tag_attrs = &$process_link('src', $page->resource_folder_name)) {
             $tag_text = "<$tag $tag_attrs".$empty_tag_end;
         }
 
     } elsif ($tag eq 'body') { #background images
-#        if (exists($attr_dict->{'background'})) {
-#            my $img_file =  $attr_dict ->{'background'};
-#            my $folder_name = $page->resource_folder_name;
-#            $attr_dict->{'background'} = $page->change_path($img_file, $folder_name, $folder_name);
-#            my $tag_attrs = HTML::Copy->build_attributes($attr_dict, $attr_names);
-#            $tag_text = "<$tag $tag_attrs>";
-#        }
         if (my $tag_attrs = &$process_link('background', $page->resource_folder_name)) {
             $tag_text = "<$tag $tag_attrs>";
         }
     }
     #linked stylesheet
     elsif ($tag eq 'link') {
-        #print Dumper(@_);
-#        my $relation;
-#        if (defined( $relation = ($attr_dict ->{'rel'}) )){
-#            $relation = lc $relation;
-#            if ($relation eq 'stylesheet') {
-#                my $styleSheetFile =  $attr_dict ->{'href'};
-#                my $folder_name = $page->resource_folder_name;
-#                $attr_dict->{'href'} = $page->change_path($styleSheetFile, $folder_name, 'css');
-#                my $tag_attrs = HTML::Copy->build_attributes($attr_dict, $attr_names);
-#                $tag_text = "<$tag $tag_attrs".$empty_tag_end;
-#            }
-#        }
         my $folder_name = $page->resource_folder_name;
         my $kind = $folder_name;
         my $relation;
@@ -207,26 +171,12 @@ sub start {
     }
     #frame
     elsif ($tag eq 'frame') {
-        #print Dumper(@_);
-#        my $page_source = $attr_dict ->{'src'};
-#        my $folder_name = $page->page_folder_name;
-#        $attr_dict->{'src'} = $page->change_path($page_source, $folder_name, 'page');
-#        my $tag_attrs = HTML::Copy->build_attributes($attr_dict, $attr_names);
-#        $tag_text = "<$tag $tag_attrs".$empty_tag_end;
         if (my $tag_attrs = &$process_link('src', $page->page_folder_name, 'page')) {
             $tag_text = "<$tag $tag_attrs".$empty_tag_end;
         }    
     }
     #javascript
     elsif ($tag eq 'script') {
-#        if (exists($attr_dict->{'src'})) {
-#            my $scriptFile = $attr_dict->{'src'};
-#            my $folder_name = $page->resource_folder_name;
-#            $attr_dict->{'src'} = $page->change_path($scriptFile, 
-#                                    $folder_name, $folder_name);
-#            my $tag_attrs = HTML::Copy->build_attributes($attr_dict, $attr_names);
-#            $tag_text = "<$tag $tag_attrs>";
-#        }
         if (my $tag_attrs = &$process_link('src', $page->resource_folder_name)) {
             $tag_text = "<$tag $tag_attrs>";
         }
@@ -244,27 +194,6 @@ sub start {
                     $kind = $folder_name;
                 }
             }
-#            if ($href !~ /^(http:|https:|ftp:|mailto:|help:|#)/ ){
-#                if ($self->{'use_abs_link'}) {
-#                    $attr_dict->{href} = $self->{'page'}->build_abs_url($href);
-#                 }
-#                 else {
-#                    my $folder_name = $page->page_folder_name;
-#                    if ($href =~/(.+)#(.*)/){
-#                        $attr_dict->{'href'} = $page->change_path($1, $folder_name, $kind)."#$2";
-#                    }
-#                    else{
-#                        my @matchedSuffix = grep {$href =~ /\Q$_\E$/} @htmlSuffix;
-#                        unless (@matchedSuffix) {
-#                            $folder_name = $page->resource_folder_name;
-#                            $kind = $folder_name;
-#                        }
-#                        $attr_dict->{'href'} = $page->change_path($href, $folder_name, $kind);
-#                    }
-#                }
-#                my $tag_attrs = HTML::Copy->build_attributes($attr_dict, $attr_names);
-#                $tag_text = "<$tag $tag_attrs>";
-#            }
             if (my $tag_attrs = &$process_link('href', $folder_name, $kind)) {
                 $tag_text = "<$tag $tag_attrs>";
             }

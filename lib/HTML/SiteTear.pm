@@ -36,7 +36,7 @@ our $VERSION = '1.40';
  use HTML::SiteTear;
 
  $p = HTML::SiteTear->new("/dev1/website/index.html");
- $p->copy_to("/dev1/website2/ReadMe.html");
+ $p->copy_to("/dev1/website2/newindex.html");
 
 =head1 DESCRIPTION
 

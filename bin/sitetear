@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl -w
 
 use strict;
 use File::Basename;
@@ -8,7 +8,7 @@ use Pod::Usage;
 
 use HTML::SiteTear;
 
-our $VERSION = '1.30';
+our $VERSION = '1.40';
 
 {
     my $man = 0;

@@ -27,7 +27,7 @@ require HTML::SiteTear::Page;
 require HTML::SiteTear::CSS;
 
 
-our $VERSION = '1.31';
+our $VERSION = '1.4';
 
 =head1 NAME
 
@@ -197,7 +197,6 @@ sub change_path {
         $new_linked_obj->link_uri($target_uri);
         
         $self->add_to_linked_files($new_linked_obj) if $should_copy;
-        #my $target_path = $link_uri->file;
         $self->add_to_filemap($abs_path, $target_uri);
     }
     #print "end of change_path\n";

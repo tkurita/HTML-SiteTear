@@ -1,4 +1,4 @@
-#!perl -w
+#!/usr/bin/env perl -w
 use 5.008;
 use strict;
 use ExtUtils::MakeMaker;
@@ -13,7 +13,8 @@ WriteMakefile(
 		'Test::More'   => 0,
 		'HTML::Parser' => 3.40,
         'HTML::Copy' => 0,
-		'Class::Accessor' => 0
+		'Class::Accessor' => 0,
+        'URI' => 0
 	},
 	'dist'           => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },	
 	'clean'          => { FILES => 'HTML-SiteTear-*' },

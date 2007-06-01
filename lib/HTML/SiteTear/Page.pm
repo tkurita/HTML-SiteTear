@@ -13,7 +13,7 @@ use HTML::SiteTear::PageFilter;
 
 require HTML::SiteTear::Item;
 our @ISA = qw(HTML::SiteTear::Item);
-our $VERSION = '1.30';
+our $VERSION = '1.40';
 
 =head1 NAME
 
@@ -145,12 +145,6 @@ sub build_abs_url {
     print "in ".$self->source_path."\n";
     print "into ".$abs_in_site->as_string."\n\n";
     return $abs_in_site->as_string;
-#    my $source_path = $self->source_path;
-#    my $abs_path = File::Spec->rel2abs($linkpath, dirname($source_path) );
-#    $abs_path = Cwd::realpath($abs_path);
-#    my $rel_path = File::Spec->abs2rel($abs_path, $self->source_root->site_root_path);
-#    my $abs_url = File::Spec->catfile($self->source_root->site_root_url, $rel_path);
-#    return $abs_url;
 }
 
 =head1 SEE ALOSO

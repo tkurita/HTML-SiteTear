@@ -19,7 +19,7 @@ HTML::SiteTear::Root->mk_accessors(qw(source_path
                                     only_subitems));
 #use Data::Dumper;
 
-our $VERSION = '1.30';
+our $VERSION = '1.40';
 
 =head1 NAME
 
@@ -51,6 +51,7 @@ our $defaultresource_folder_name = 'assets';
 make a new instance.
 
 =cut
+
 sub new {
     my $class = shift @_;
     my %args = @_;
@@ -81,6 +82,7 @@ sub set_default_folder_names {
 Add a file path already copied to the copiedFiles table of the root object of the parent chain.
 
 =cut
+
 sub add_to_copyied_files {
     my ($self, $path) = @_;
     #$path = Cwd::realpath($path);
@@ -95,6 +97,7 @@ sub add_to_copyied_files {
 Check existance of $source_path in the copiedFiles entry.
 
 =cut
+
 sub exists_in_copied_files {
     my ($self, $path) = @_;
     return grep(/^$path$/, @{$self->{'copiedFiles'}});
@@ -107,6 +110,7 @@ sub exists_in_copied_files {
 add to copyied file information into the internal table "filemap".
 
 =cut
+
 sub add_to_filemap {
     my ($self, $source_path, $destination_path) = @_;
     $self->{'fileMapRef'}->{$source_path} = $destination_path;
@@ -120,6 +124,7 @@ sub add_to_filemap {
 check $source_path is entry in FileMap
 
 =cut
+
 sub exists_in_filemap {
     my ($self, $path) = @_;
     return exists($self->{fileMapRef}->{$path});

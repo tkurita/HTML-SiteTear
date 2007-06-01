@@ -1,4 +1,10 @@
 Revision history for Perl extension HTML::SiteTear.
 
+1.4 2007-06-01
+	* add compatibility to XHTML
+	* process with taking account of <base> tag
+	* use URI module instead of File::Spec to convert link path.
+		* HTML::SiteTear may work on non-unix platform.
+
 1.3 2007-03-05
 	* First version to update CPAN

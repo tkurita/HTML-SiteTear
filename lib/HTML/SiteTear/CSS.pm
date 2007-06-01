@@ -9,7 +9,7 @@ use File::Path;
 require HTML::SiteTear::Item;
 our @ISA = qw(HTML::SiteTear::Item);
 
-our $VERSION = '1.30';
+our $VERSION = '1.40';
 
 =head1 NAME
 
