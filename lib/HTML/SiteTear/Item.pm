@@ -8,8 +8,9 @@ use File::Basename;
 use File::Copy;
 use File::Path;
 use Cwd;
-use Data::Dumper;
 use URI::file;
+use Data::Dumper;
+
 
 use base qw(Class::Accessor);
 __PACKAGE__->mk_accessors(qw(linkpath
@@ -27,7 +28,7 @@ require HTML::SiteTear::Page;
 require HTML::SiteTear::CSS;
 
 
-our $VERSION = '1.4';
+our $VERSION = '1.41';
 
 =head1 NAME
 
@@ -140,7 +141,7 @@ sub change_path {
     unless (defined($kind)){
         $kind = $folder_name;
     }
-
+    my $fragment = $uri->fragment;
     $uri = $uri->abs($self->base_uri);
     my $abs_path = $uri->file;
     unless (-e $abs_path) {
@@ -153,6 +154,9 @@ sub change_path {
     if ($self->exists_in_filemap($abs_path) ) {
         $result_path 
            = $self->rel_for_mappedfile($abs_path, $self->target_uri);
+        if ($fragment) {
+            $result_path = $result_path."#".$fragment;
+        }
 
     } else {
 
@@ -191,13 +195,18 @@ sub change_path {
             $new_link_uri = URI->new($linkpath);
         }
         
-        $result_path = $new_link_uri->as_string;
         $new_linked_obj->linkpath($result_path);
         my $target_uri = $new_link_uri->abs($self->target_uri);
         $new_linked_obj->link_uri($target_uri);
         
         $self->add_to_linked_files($new_linked_obj) if $should_copy;
         $self->add_to_filemap($abs_path, $target_uri);
+        
+        if ($fragment) {
+            $new_link_uri->fragment($fragment);
+        }
+        $result_path = $new_link_uri->as_string;
+
     }
     #print "end of change_path\n";
     return $result_path

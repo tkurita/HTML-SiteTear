@@ -8,7 +8,7 @@ use Pod::Usage;
 
 use HTML::SiteTear;
 
-our $VERSION = '1.40';
+our $VERSION = '1.41';
 
 {
     my $man = 0;
