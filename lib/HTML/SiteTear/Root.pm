@@ -19,7 +19,7 @@ HTML::SiteTear::Root->mk_accessors(qw(source_path
                                     only_subitems));
 #use Data::Dumper;
 
-our $VERSION = '1.40';
+our $VERSION = '1.42';
 
 =head1 NAME
 
@@ -105,16 +105,18 @@ sub exists_in_copied_files {
 
 =head2 add_to_filemap
 
-    $root->add_to_filemap($source_path, $destination_path);
+    $root->add_to_filemap($source_path, $destination_uri);
 
-add to copyied file information into the internal table "filemap".
+Add to copyied file information into the internal table "filemap".
+A fragment of $destination_uri is dropped.
 
 =cut
 
 sub add_to_filemap {
-    my ($self, $source_path, $destination_path) = @_;
-    $self->{'fileMapRef'}->{$source_path} = $destination_path;
-    return $destination_path;
+    my ($self, $source_path, $destination_uri) = @_;
+    $destination_uri->fragment(undef);
+    $self->{'fileMapRef'}->{$source_path} = $destination_uri;
+    return $destination_uri;
 }
 
 =head2 exists_in_filemap
@@ -139,16 +141,14 @@ sub item_in_filemap {
 
     $root->rel_for_mappedfile($source_path, $base_uri);
 
-get relative path of copied file of $source_path from $base_uri.
+get relative URI of copied file of $source_path from $base_uri.
 
 =cut
 
 sub rel_for_mappedfile {
     my ($self, $source_path, $base_uri) = @_;
-#    my $destination_path = ($self->{'fileMapRef'}->{$source_path});
-#    return File::Spec->abs2rel($destination_path, $base);
     my $target_uri = $self->{'fileMapRef'}->{$source_path};
-    return $target_uri->rel($base_uri)->as_string;
+    return $target_uri->rel($base_uri);
 }
 
 sub source_root_path {

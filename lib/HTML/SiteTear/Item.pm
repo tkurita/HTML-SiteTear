@@ -28,7 +28,7 @@ require HTML::SiteTear::Page;
 require HTML::SiteTear::CSS;
 
 
-our $VERSION = '1.41';
+our $VERSION = '1.42';
 
 =head1 NAME
 
@@ -154,10 +154,7 @@ sub change_path {
     if ($self->exists_in_filemap($abs_path) ) {
         $result_path 
            = $self->rel_for_mappedfile($abs_path, $self->target_uri);
-        if ($fragment) {
-            $result_path = $result_path."#".$fragment;
-        }
-
+        $result_path->fragment($fragment);
     } else {
 
         my $new_linked_obj;

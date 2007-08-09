@@ -1,5 +1,8 @@
 Revision history for Perl extension HTML::SiteTear.
 
+1.42 2007-08-09
+    * fix a problem related with fgrament of URI.
+    
 1.41 2007-08-07
     * fix a problem of fgrament of URI is dropped.
 
