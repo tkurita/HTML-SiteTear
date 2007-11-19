@@ -6,7 +6,7 @@ use File::Basename;
 use Encode;
 use Encode::Guess;
 use URI;
-use Data::Dumper;
+#use Data::dumper;
 
 use HTML::Parser 3.40;
 use HTML::HeadParser;
