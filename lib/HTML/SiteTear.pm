@@ -92,7 +92,7 @@ sub new {
             if (@htmlfiles) {
                 $self->member_files(\@htmlfiles);
             } else {
-                croak "Can't files under $self->source_path.\n";
+                croak "Can't find HTML files under $self->source_path.\n";
             }
         }
         $self->source_path(fix_dir_path($self->source_path));
