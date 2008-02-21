@@ -5,6 +5,7 @@ use strict;
 use warnings;
 use File::Basename;
 use File::Spec;
+use File::Path;
 use Cwd;
 use Carp;
 use base qw(Class::Accessor);
@@ -17,7 +18,7 @@ __PACKAGE__->mk_accessors( qw(source_path
 use HTML::SiteTear::Root;
 use HTML::SiteTear::Page;
 
-#use Data::Dumper;
+use Data::Dumper;
 
 =head1 NAME
 
@@ -115,6 +116,13 @@ sub copy_to {
         if (-d $destination_path) {
             $destination_path = File::Spec->catfile($destination_path,
                                                basename($source_path));
+        }
+    } else {
+        my ($name, $dir) = fileparse($destination_path);
+        mkpath($dir);
+        unless ($name) {
+            $destination_path = File::Spec->catfile($destination_path,
+                                                basename($source_path));
         }
     }
     
