@@ -100,7 +100,7 @@ sub copy_to_linkpath {
         mkpath(dirname($target_path));
         my $io = IO::File->new("> $target_path") 
                                 or die "Can't open $target_path";
-        $target_path = Cwd::realpath($target_path);
+        #$target_path = Cwd::realpath($target_path);
         $self->target_path($target_path);
         $self->{'OUT'} = $io;
         print "Copying HTML...\n";

@@ -16,8 +16,8 @@ __PACKAGE__->mk_accessors(qw(has_remote_base
 
 use HTML::Copy;
 
-our $VERSION = '1.40';
-our @htmlSuffix = qw(.html .htm);
+our $VERSION = '1.43';
+our @htmlSuffix = qw(.html .htm .xhtml);
 
 =head1 NAME
 

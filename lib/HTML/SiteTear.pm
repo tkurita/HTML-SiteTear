@@ -18,7 +18,7 @@ __PACKAGE__->mk_accessors( qw(source_path
 use HTML::SiteTear::Root;
 use HTML::SiteTear::Page;
 
-use Data::Dumper;
+#use Data::Dumper;
 
 =head1 NAME
 
@@ -26,11 +26,11 @@ HTML::SiteTear - Make a separated copy of a part of the site
 
 =head1 VERSION
 
-Version 1.42
+Version 1.43
 
 =cut
 
-our $VERSION = '1.42';
+our $VERSION = '1.43';
 
 =head1 SYMPOSIS
 
@@ -84,7 +84,8 @@ sub new {
         
     } else {
         if ($self->member_files) {
-            croak $self->source_path." is not a directory. Must be a directory.\n";
+            croak $self->source_path.
+                    " is not a directory. Must be a directory.\n";
         }    
     }
         
@@ -121,7 +122,7 @@ sub copy_to {
         my ($name, $dir) = fileparse($destination_path);
         mkpath($dir);
         unless ($name) {
-            $destination_path = File::Spec->catfile($destination_path,
+            $destination_path = File::Spec->catfile($dir,
                                                 basename($source_path));
         }
     }
@@ -132,7 +133,8 @@ sub copy_to {
                                         'parent' => $root,
                                         'source_path' => $source_path);
     $new_source_page->linkpath( basename($destination_path) );
-    $new_source_page->link_uri(URI::file->new(Cwd::abs_path($destination_path)));
+    #$new_source_page->link_uri(URI::file->new(Cwd::abs_path($destination_path)));
+    $new_source_page->link_uri(URI::file->new_abs($destination_path));
     $new_source_page->copy_to_linkpath;
     return $new_source_page;
 }
@@ -160,7 +162,8 @@ sub copy_to_dir {
     foreach my $file (@{$self->member_files}) {
         my $a_member_file = $file;
         unless (File::Spec->file_name_is_absolute($a_member_file)) {
-            $a_member_file = File::Spec->rel2abs($a_member_file, $self->source_path);
+            $a_member_file = File::Spec->rel2abs($a_member_file, 
+                                                $self->source_path);
             $a_member_file = Cwd::abs_path($a_member_file);
         }
         my $page = HTML::SiteTear::Page->new(
