@@ -6,6 +6,7 @@ use warnings;
 use File::Basename;
 use File::Spec;
 use File::Path;
+use File::Find;
 use Cwd;
 use Carp;
 use base qw(Class::Accessor);
@@ -18,7 +19,7 @@ __PACKAGE__->mk_accessors( qw(source_path
 use HTML::SiteTear::Root;
 use HTML::SiteTear::Page;
 
-#use Data::Dumper;
+use Data::Dumper;
 
 =head1 NAME
 
@@ -62,6 +63,8 @@ Make an instance of this module. The path to source HTML file "$source_path" is 
 
 =cut
 
+our @DEFAULT_HTML_SUFFIXES = qw(.html .htm .xhtml);
+
 sub new {
     my $class = shift @_;
     my $self;
@@ -78,7 +81,19 @@ sub new {
     
     if (-d $self->source_path) {
         unless ($self->member_files) {
-            croak $self->source_path." is a directory. Must be a file.\n";
+            my @htmlfiles;
+            my $wanted = sub {
+                my $name = $_; 
+                if (grep {$name =~ /\Q$_\E$/} @DEFAULT_HTML_SUFFIXES) {
+                    push @htmlfiles, $File::Find::name;
+                }
+            };
+            find($wanted, $self->source_path);
+            if (@htmlfiles) {
+                $self->member_files(\@htmlfiles);
+            } else {
+                croak "Can't files under $self->source_path.\n";
+            }
         }
         $self->source_path(fix_dir_path($self->source_path));
         
