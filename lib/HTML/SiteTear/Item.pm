@@ -28,7 +28,7 @@ require HTML::SiteTear::Page;
 require HTML::SiteTear::CSS;
 
 
-our $VERSION = '1.42';
+our $VERSION = '1.43';
 
 =head1 NAME
 
@@ -96,9 +96,9 @@ sub copy_to_linkpath {
             $target_path = $self->link_uri->file;
         }
         
-        print "Copying asset...\n";
+        print "\nCopying asset...\n";
         print "from : $source_path\n";
-        print "to : $target_path\n\n";
+        print "to : $target_path\n";
         ($source_path eq $target_path) and die "source and target is same file.\n";
         mkpath(dirname($target_path));
         copy($source_path, $target_path);
@@ -145,7 +145,7 @@ sub change_path {
     $uri = $uri->abs($self->base_uri);
     my $abs_path = $uri->file;
     unless (-e $abs_path) {
-        warn("$abs_path is not found.\nThe link to this path is not changed.\n");
+        warn("\n$abs_path is not found.\nThe link to this path is not changed.\n");
         return $linkpath;
     }
     

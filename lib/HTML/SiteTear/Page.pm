@@ -13,7 +13,7 @@ use HTML::SiteTear::PageFilter;
 
 require HTML::SiteTear::Item;
 our @ISA = qw(HTML::SiteTear::Item);
-our $VERSION = '1.40';
+our $VERSION = '1.43';
 
 =head1 NAME
 
@@ -103,7 +103,7 @@ sub copy_to_linkpath {
         #$target_path = Cwd::realpath($target_path);
         $self->target_path($target_path);
         $self->{'OUT'} = $io;
-        print "Copying HTML...\n";
+        print "\nCopying HTML...\n";
         print "from : $source_path\n";
         print "to : $target_path\n\n";
         ($source_path eq $target_path) and die "source and target is same file.\n";
@@ -141,10 +141,10 @@ sub build_abs_url {
     my $abs_uri = $link_uri->abs($self->source_uri);
     my $rel_from_root = $abs_uri->rel($self->source_root->site_root_file_uri);
     my $abs_in_site = $rel_from_root->abs($self->source_root->site_root_uri);
-    print "Converting to absolute link...\n";
+    print "\nConverting to absolute link...\n";
     print "from a link ".$link_uri."\n";
     print "in ".$self->source_path."\n";
-    print "into ".$abs_in_site->as_string."\n\n";
+    print "into ".$abs_in_site->as_string."\n";
     return $abs_in_site->as_string;
 }
 
