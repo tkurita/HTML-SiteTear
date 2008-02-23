@@ -105,7 +105,7 @@ sub copy_to_linkpath {
         $self->{'OUT'} = $io;
         print "\nCopying HTML...\n";
         print "from : $source_path\n";
-        print "to : $target_path\n\n";
+        print "to : $target_path\n";
         ($source_path eq $target_path) and die "source and target is same file.\n";
         $filter->parse_file;
         $io->close;
