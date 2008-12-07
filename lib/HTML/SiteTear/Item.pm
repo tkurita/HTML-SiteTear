@@ -7,10 +7,9 @@ use File::Spec;
 use File::Basename;
 use File::Copy;
 use File::Path;
-use Cwd;
+#use Cwd;
 use URI::file;
 use Data::Dumper;
-
 
 use base qw(Class::Accessor);
 __PACKAGE__->mk_accessors(qw(linkpath
@@ -28,7 +27,7 @@ require HTML::SiteTear::Page;
 require HTML::SiteTear::CSS;
 
 
-our $VERSION = '1.43';
+our $VERSION = '1.44';
 
 =head1 NAME
 
@@ -103,7 +102,8 @@ sub copy_to_linkpath {
         mkpath(dirname($target_path));
         copy($source_path, $target_path);
         $self->add_to_copyied_files($source_path);
-        $self->target_path(Cwd::abs_path($target_path));
+        #$self->target_path(Cwd::abs_path($target_path));
+        $self->target_path($target_path);
     }
 }
 
@@ -149,10 +149,10 @@ sub change_path {
         return $linkpath;
     }
     
-    $abs_path = Cwd::realpath($abs_path);
-    
+    #$abs_path = Cwd::abs_path($abs_path);
+    #print "abs_path in change_path:".$abs_path."\n";
     if ($self->exists_in_filemap($abs_path) ) {
-        $result_path 
+        $result_path
            = $self->rel_for_mappedfile($abs_path, $self->target_uri);
         $result_path->fragment($fragment);
     } else {
@@ -341,14 +341,18 @@ sub source_path {
     my $self = shift @_;
     
     if (@_) {
-        my $path = Cwd::abs_path($_[0]);
+        #my $path = Cwd::abs_path($_[0]);
+        my $path = shift @_;
         $self->{'source_path'} = $path;
-        my $uri = URI::file->new($path);
+        my $uri = URI::file->new_abs($path);
         $self->source_uri($uri);
         $self->base_uri($uri);
     }
-    
-    return $self->{'source_path'};
+    if ($self->source_uri) {
+        return $self->source_uri->file;
+    } else {
+        return $self->{'source_path'};
+    }
 }
 
 =head2 target_path

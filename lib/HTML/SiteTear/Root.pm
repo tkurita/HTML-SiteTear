@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use File::Spec;
 use File::Basename;
-use Cwd;
+#use Cwd;
 use URI::file;
 use base qw(Class::Accessor);
 HTML::SiteTear::Root->mk_accessors(qw(source_path
@@ -19,7 +19,7 @@ HTML::SiteTear::Root->mk_accessors(qw(source_path
                                     only_subitems));
 #use Data::Dumper;
 
-our $VERSION = '1.42';
+our $VERSION = '1.44';
 
 =head1 NAME
 

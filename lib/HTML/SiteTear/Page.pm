@@ -2,7 +2,7 @@ package HTML::SiteTear::Page;
 
 use strict;
 use warnings;
-use Cwd;
+#use Cwd;
 use File::Spec;
 use File::Basename;
 use IO::File;
@@ -13,7 +13,7 @@ use HTML::SiteTear::PageFilter;
 
 require HTML::SiteTear::Item;
 our @ISA = qw(HTML::SiteTear::Item);
-our $VERSION = '1.43';
+our $VERSION = '1.44';
 
 =head1 NAME
 

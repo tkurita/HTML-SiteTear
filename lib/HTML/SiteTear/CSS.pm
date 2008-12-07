@@ -103,7 +103,7 @@ sub copy_to_linkpath {
         mkpath(dirname($target_path));
         $self->target_path($target_path); #temporary set for css_copy
         $self->css_copy($target_path);
-        $self->target_path(Cwd::realpath($target_path));
+        #$self->target_path(Cwd::abs_path($target_path));
         $self->add_to_copyied_files($source_path);
         $self->copy_linked_files;
     }

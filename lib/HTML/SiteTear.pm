@@ -7,7 +7,7 @@ use File::Basename;
 use File::Spec;
 use File::Path;
 use File::Find;
-use Cwd;
+#use Cwd;
 use Carp;
 use base qw(Class::Accessor);
 __PACKAGE__->mk_accessors( qw(source_path
@@ -27,11 +27,11 @@ HTML::SiteTear - Make a separated copy of a part of the site
 
 =head1 VERSION
 
-Version 1.43
+Version 1.44
 
 =cut
 
-our $VERSION = '1.43';
+our $VERSION = '1.44';
 
 =head1 SYMPOSIS
 
@@ -121,7 +121,7 @@ Copy $source_path into $destination_path. All linked file in $source_path will b
 =cut
 
 sub copy_to {
-    #print "start copyTo in SiteTear.pm\n";
+    #print "start copy_to in SiteTear.pm\n";
     my ($self, $destination_path) = @_;
     my $source_path = $self->source_path;
     if ($self->member_files) {
@@ -177,9 +177,11 @@ sub copy_to_dir {
     foreach my $file (@{$self->member_files}) {
         my $a_member_file = $file;
         unless (File::Spec->file_name_is_absolute($a_member_file)) {
-            $a_member_file = File::Spec->rel2abs($a_member_file, 
-                                                $self->source_path);
-            $a_member_file = Cwd::abs_path($a_member_file);
+            #$a_member_file = File::Spec->rel2abs($a_member_file,
+            #                                    $self->source_path);
+            #$a_member_file = Cwd::abs_path($a_member_file);
+            $a_member_file = URI::file->new($a_member_file)
+                                   ->abs($self->source_path)->file;
         }
         my $page = HTML::SiteTear::Page->new(
                                             'parent' => $root,
