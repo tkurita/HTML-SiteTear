@@ -19,7 +19,7 @@ HTML::SiteTear::Root->mk_accessors(qw(source_path
                                     only_subitems));
 #use Data::Dumper;
 
-our $VERSION = '1.44';
+our $VERSION = '1.43';
 
 =head1 NAME
 

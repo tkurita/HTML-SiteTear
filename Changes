@@ -1,5 +1,13 @@
 Revision history for Perl extension HTML::SiteTear.
 
+1.43 2009-05-16
+    * Use URI::file's abs instead of File::Spec->rel2abs.
+    * new method can accept a directory as an argument. in this case, 
+      all html files will1be targets.
+    * add '.xhtml' as html suffixes
+    * copy_to can accept directory path
+    * add error handling when output file can't be open
+    
 1.42 2007-08-09
     * fix a problem related with fgrament of URI.
     
