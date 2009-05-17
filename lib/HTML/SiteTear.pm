@@ -7,7 +7,7 @@ use File::Basename;
 use File::Spec;
 use File::Path;
 use File::Find;
-#use Cwd;
+use Cwd;
 use Carp;
 use base qw(Class::Accessor);
 __PACKAGE__->mk_accessors( qw(source_path
@@ -78,8 +78,14 @@ sub new {
     
     $self->source_path or croak "source_path is not specified.\n";
     (-e $self->source_path) or croak $self->source_path." is not found.\n";
-    
+        
     if (-d $self->source_path) {
+        unless (File::Spec->file_name_is_absolute($self->source_path)) {
+            my $cwd = fix_dir_path(cwd);
+            $self->source_path(
+                URI::file->new($self->source_path)->abs($cwd)->file);
+        }
+        
         unless ($self->member_files) {
             my @htmlfiles;
             my $wanted = sub {
@@ -147,7 +153,7 @@ sub copy_to {
     my $new_source_page = HTML::SiteTear::Page->new(
                                         'parent' => $root,
                                         'source_path' => $source_path);
-    $new_source_page->linkpath( basename($destination_path) );
+    $new_source_page->linkpath(basename($destination_path) );
     #$new_source_page->link_uri(URI::file->new(Cwd::abs_path($destination_path)));
     $new_source_page->link_uri(URI::file->new_abs($destination_path));
     $new_source_page->copy_to_linkpath;
@@ -177,9 +183,6 @@ sub copy_to_dir {
     foreach my $file (@{$self->member_files}) {
         my $a_member_file = $file;
         unless (File::Spec->file_name_is_absolute($a_member_file)) {
-            #$a_member_file = File::Spec->rel2abs($a_member_file,
-            #                                    $self->source_path);
-            #$a_member_file = Cwd::abs_path($a_member_file);
             $a_member_file = URI::file->new($a_member_file)
                                    ->abs($self->source_path)->file;
         }
@@ -197,7 +200,7 @@ sub copy_to_dir {
 
 =head1 ABSOLUTE LINK
 
-The default behavior of HTML::SiteTear follows all of links in HTML files. In some case, there are links should not be followd. For example, if theare is a link to the top page of the site, all of files in the site will be copyied. Such links should be converted to absolute links (ex. "http://www.....").
+The default behavior of HTML::SiteTear follows all of links in HTML files. In some case, there are links should not be followd. For example, if theare is a link to the top page of the site, all of files in the site will be copyied. Such links should be converted to absolute links (e.g. "http://www.....").
 
 To convert links should not be followed into absolute links,
 
@@ -218,6 +221,10 @@ A file path of the root of the site in the local file system.
 A URL corresponding to 'site_root_path' in WWW.
 
 =back
+
+=item *
+
+Relative links to upper level files from 'source_path' are automatically converted to absolute links.
 
 =item *
 
