@@ -27,11 +27,11 @@ HTML::SiteTear - Make a separated copy of a part of the site
 
 =head1 VERSION
 
-Version 1.43
+Version 1.44
 
 =cut
 
-our $VERSION = '1.43';
+our $VERSION = '1.44';
 
 =head1 SYMPOSIS
 

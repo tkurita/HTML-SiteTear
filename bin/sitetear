@@ -8,13 +8,13 @@ use Pod::Usage;
 
 use HTML::SiteTear;
 
-our $VERSION = '1.43';
+our $VERSION = '1.44';
 
 {
     my $man = 0;
-	my $help = 0;
-	my $filter;
-	my $site_root_path = '';
+    my $help = 0;
+    my $filter;
+    my $site_root_path = '';
     my $site_root_uri = '';
     
     GetOptions('help|?' => \$help, man => \$man,
@@ -25,15 +25,15 @@ our $VERSION = '1.43';
     pod2usage(-exitstatus => 0, -verbose => 1) if $help;
     pod2usage(-exitstatus => 0, -verbose => 2) if $man;
     
-	if (@ARGV > 2) {
-		pod2usage(-message => 'Too many arguments.', 
-			  -exitstatus => 1, -verbose => 1)
-	}
+    if (@ARGV > 2) {
+        pod2usage(-message => 'Too many arguments.', 
+              -exitstatus => 1, -verbose => 1)
+    }
 
-	if (@ARGV < 2) {
-		pod2usage(-message => 'Required arguments is not given.', 
-			  -exitstatus => 1, -verbose => 1)
-	}
+    if (@ARGV < 2) {
+        pod2usage(-message => 'Required arguments is not given.', 
+              -exitstatus => 1, -verbose => 1)
+    }
 
     my ($source_path, $target_path) = @ARGV;
     
@@ -41,7 +41,7 @@ our $VERSION = '1.43';
                                     'site_root_path' => $site_root_path,
                                     'site_root_uri' => $site_root_uri);
     if ($filter) {
-    	$siteTear->page_filter($filter);
+        $siteTear->page_filter($filter);
     }
     
     $siteTear->copy_to($target_path);
