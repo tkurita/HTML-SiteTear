@@ -6,7 +6,7 @@ use File::Basename;
 use Encode;
 use Encode::Guess;
 use URI;
-#use Data::dumper;
+#use Data::Dumper;
 
 use HTML::Parser 3.40;
 use HTML::HeadParser;
@@ -16,7 +16,7 @@ __PACKAGE__->mk_accessors(qw(has_remote_base
 
 use HTML::Copy;
 
-our $VERSION = '1.43';
+our $VERSION = '1.44b';
 our @htmlSuffix = qw(.html .htm .xhtml);
 
 =head1 NAME
@@ -52,6 +52,7 @@ sub new {
     $self->page($page);
     $self->{'allow_abs_link'} = $page->source_root->allow_abs_link;
     $self->{'use_abs_link'} = 0;
+    $self->attr_encoded(1);
     $self->has_remote_base(0);
     return $self;
 }
