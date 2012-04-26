@@ -4,19 +4,20 @@ use strict;
 use warnings;
 use File::Spec;
 use File::Basename;
-#use Cwd;
 use URI::file;
+use Data::Dumper;
+
 use base qw(Class::Accessor);
-HTML::SiteTear::Root->mk_accessors(qw(source_path
-                                    source_root_uri
-                                    resource_folder_name
-                                    page_folder_name
-                                    target_path
-                                    site_root_path
-                                    site_root_file_uri
-                                    site_root_uri
-                                    allow_abs_link
-                                    only_subitems));
+__PACKAGE__->mk_accessors(qw(source_path
+                             source_root_uri
+                             resource_folder_name
+                             page_folder_name
+                             target_path
+                             site_root_path
+                             site_root_local_uri
+                             site_root_uri
+                             allow_abs_link
+                             only_subitems));
 #use Data::Dumper;
 
 our $VERSION = '1.43';
@@ -62,7 +63,7 @@ sub new {
     
     if ($self->site_root_path and $self->site_root_uri) {
         $self->allow_abs_link(1);
-        $self->site_root_file_uri(URI::file->new($self->site_root_path));
+        $self->site_root_local_uri(URI::file->new($self->site_root_path));
         $self->site_root_uri(URI->new($self->site_root_uri));
     }
     $self->source_root_uri(URI::file->new($self->source_path));
