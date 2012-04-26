@@ -20,7 +20,7 @@ __PACKAGE__->mk_accessors(qw(source_path
                              only_subitems));
 #use Data::Dumper;
 
-our $VERSION = '1.43';
+our $VERSION = '1.44b';
 
 =head1 NAME
 
