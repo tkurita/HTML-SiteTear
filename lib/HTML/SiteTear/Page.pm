@@ -2,18 +2,18 @@ package HTML::SiteTear::Page;
 
 use strict;
 use warnings;
-#use Cwd;
 use File::Spec;
-use File::Basename;
+use File::Basename qw(dirname);
 use IO::File;
-use File::Path;
+use File::Path qw(mkpath);
 #use Data::Dumper;
 
 use HTML::SiteTear::PageFilter;
 
-require HTML::SiteTear::Item;
-our @ISA = qw(HTML::SiteTear::Item);
-our $VERSION = '1.43';
+#require HTML::SiteTear::Item;
+#our @ISA = qw(HTML::SiteTear::Item);
+use base qw(HTML::SiteTear::Item);
+our $VERSION = '1.45b';
 
 =head1 NAME
 
@@ -100,7 +100,6 @@ sub copy_to_linkpath {
         mkpath(dirname($target_path));
         my $io = IO::File->new("> $target_path") 
                                 or die "Can't open $target_path";
-        #$target_path = Cwd::realpath($target_path);
         $self->target_path($target_path);
         $self->{'OUT'} = $io;
         print "\nCopying HTML...\n";
@@ -139,7 +138,7 @@ sub build_abs_url {
         return $linkpath;
     }
     my $abs_uri = $link_uri->abs($self->source_uri);
-    my $rel_from_root = $abs_uri->rel($self->source_root->site_root_file_uri);
+    my $rel_from_root = $abs_uri->rel($self->source_root->site_root_local_uri);
     my $abs_in_site = $rel_from_root->abs($self->source_root->site_root_uri);
     print "\nConverting to absolute link...\n";
     print "from a link ".$link_uri."\n";
@@ -150,7 +149,7 @@ sub build_abs_url {
 
 =head1 SEE ALOSO
 
-L<HTML::SiteTear>, L<HTML::SiteTear::Item>, L<HTML::SiteTear::CSS>, L<HTML::SiteTear::Root>, L<HTML::SiteTear::dPageFilter>
+L<HTML::SiteTear>, L<HTML::SiteTear::Item>, L<HTML::SiteTear::CSS>, L<HTML::SiteTear::Root>, L<HTML::SiteTear::PageFilter>
 
 =head1 AUTHOR
 
