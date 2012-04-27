@@ -15,7 +15,6 @@ __PACKAGE__->mk_accessors(qw(source_path
                              site_root_uri
                              allow_abs_link
                              only_subitems));
-#use Data::Dumper;
 
 our $VERSION = '1.45b';
 
@@ -165,7 +164,7 @@ sub source_root {
 sub site_root_path {
     my $self = shift @_;
     if (@_) {
-        my $path = @_[0];
+        my $path = $_[0];
         if (-d $path and $path !~ /\/$/) {
             $path = $path.'/';
         }
