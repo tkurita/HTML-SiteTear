@@ -13,14 +13,13 @@ __PACKAGE__->mk_accessors(qw(source_path
                              resource_folder_name
                              page_folder_name
                              target_path
-                             site_root_path
                              site_root_local_uri
                              site_root_uri
                              allow_abs_link
                              only_subitems));
 #use Data::Dumper;
 
-our $VERSION = '1.44b';
+our $VERSION = '1.45b';
 
 =head1 NAME
 
@@ -61,10 +60,13 @@ sub new {
     $self->{'copiedFiles'} = [];
     $self->set_default_folder_names;
     
-    if ($self->site_root_path and $self->site_root_uri) {
-        $self->allow_abs_link(1);
-        $self->site_root_local_uri(URI::file->new($self->site_root_path));
-        $self->site_root_uri(URI->new($self->site_root_uri));
+    if ($self->site_root_path) {
+        $self->site_root_path($self->site_root_path);
+        if ($self->site_root_uri) {
+            $self->allow_abs_link(1);
+            $self->site_root_local_uri(URI::file->new($self->site_root_path));
+            $self->site_root_uri(URI->new($self->site_root_uri));
+        }
     }
     $self->source_root_uri(URI::file->new($self->source_path));
     return $self;
@@ -160,6 +162,18 @@ sub source_root_path {
 sub source_root {
     my $self = shift @_;
     return $self
+}
+
+sub site_root_path {
+    my $self = shift @_;
+    if (@_) {
+        my $path = @_[0];
+        if (-d $path and $path !~ /\/$/) {
+            $path = $path.'/';
+        }
+        $self->{'site_root_path'} = $path;
+    }
+    return $self->{'site_root_path'};
 }
 
 =head1 SEE ALSO
