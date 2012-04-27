@@ -4,12 +4,11 @@ use strict;
 use warnings;
 
 use File::Spec;
-use File::Basename;
-use File::Copy;
-use File::Path;
-#use Cwd;
+use File::Basename qw(basename dirname);
+use File::Copy qw(copy);
+use File::Path qw(mkpath);
 use URI::file;
-use Data::Dumper;
+#use Data::Dumper;
 
 use base qw(Class::Accessor);
 __PACKAGE__->mk_accessors(qw(linkpath
@@ -27,7 +26,7 @@ require HTML::SiteTear::Page;
 require HTML::SiteTear::CSS;
 
 
-our $VERSION = '1.43';
+our $VERSION = '1.45b';
 
 =head1 NAME
 
