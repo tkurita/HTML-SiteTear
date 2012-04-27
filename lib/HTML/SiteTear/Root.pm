@@ -3,9 +3,8 @@ package HTML::SiteTear::Root;
 use strict;
 use warnings;
 use File::Spec;
-use File::Basename;
 use URI::file;
-use Data::Dumper;
+#use Data::Dumper;
 
 use base qw(Class::Accessor);
 __PACKAGE__->mk_accessors(qw(source_path
