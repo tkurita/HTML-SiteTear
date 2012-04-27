@@ -2,7 +2,6 @@ package HTML::SiteTear::Root;
 
 use strict;
 use warnings;
-use File::Spec;
 use URI::file;
 #use Data::Dumper;
 
