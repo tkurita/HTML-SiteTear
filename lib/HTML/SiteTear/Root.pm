@@ -5,7 +5,7 @@ use warnings;
 use URI::file;
 #use Data::Dumper;
 
-use base qw(Class::Accessor);
+use base qw(Class::Accessor::Fast);
 __PACKAGE__->mk_accessors(qw(source_path
                              source_root_uri
                              resource_folder_name
