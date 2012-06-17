@@ -134,7 +134,6 @@ sub start {
         return ();
     };
     
-    #treat image files
     if ($tag eq 'base') {
         my $uri = URI->new($attr_dict->{'href'});
         if (!($uri->scheme) or ($uri->scheme eq 'file')) {
@@ -143,7 +142,7 @@ sub start {
         } else {
             $self->has_remote_base(1);
         }
-        
+    #treat image files    
     } elsif ($tag eq 'img') {
         if (my $tag_attrs = &$process_link('src', $page->resource_folder_name)) {
             $tag_text = "<$tag $tag_attrs".$empty_tag_end;
@@ -177,7 +176,7 @@ sub start {
         }    
     }
     #javascript
-    elsif ($tag eq 'script') {
+    elsif (($tag eq 'script') or ($tag eq 'embed')) {
         if (my $tag_attrs = &$process_link('src', $page->resource_folder_name)) {
             $tag_text = "<$tag $tag_attrs>";
         }
@@ -199,6 +198,11 @@ sub start {
                 $tag_text = "<$tag $tag_attrs>";
             }
         }
+    }
+    elsif ($tag eq 'param') {
+        if (my $tag_attrs = &$process_link('src', $page->resource_folder_name)) {
+            $tag_text = "<$tag $tag_attrs".$empty_tag_end;
+        }        
     }
     
     $self->output($tag_text);
