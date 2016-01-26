@@ -9,7 +9,7 @@ use File::Path;
 use File::Find;
 use Cwd;
 use Carp;
-use base qw(Class::Accessor);
+use base qw(Class::Accessor::Fast);
 __PACKAGE__->mk_accessors( qw(source_path
                              site_root_path
                              site_root_url
@@ -19,7 +19,7 @@ __PACKAGE__->mk_accessors( qw(source_path
 use HTML::SiteTear::Root;
 use HTML::SiteTear::Page;
 
-use Data::Dumper;
+# use Data::Dumper;
 
 =head1 NAME
 
@@ -27,11 +27,11 @@ HTML::SiteTear - Make a separated copy of a part of the site
 
 =head1 VERSION
 
-Version 1.44
+Version 1.45
 
 =cut
 
-our $VERSION = '1.44';
+our $VERSION = '1.45';
 
 =head1 SYMPOSIS
 
@@ -178,7 +178,7 @@ sub copy_to_dir {
     $self->target_path($destination_path);
     my $root = HTML::SiteTear::Root->new(%$self);
     my $source_root_uri = $root->source_root_uri;
-    my $dest_uri = URI::file->new($destination_path);
+    my $dest_uri = URI::file->new_abs($destination_path);
     my @results;
     foreach my $file (@{$self->member_files}) {
         my $a_member_file = $file;

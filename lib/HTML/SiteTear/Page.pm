@@ -10,10 +10,8 @@ use File::Path qw(mkpath);
 
 use HTML::SiteTear::PageFilter;
 
-#require HTML::SiteTear::Item;
-#our @ISA = qw(HTML::SiteTear::Item);
 use base qw(HTML::SiteTear::Item);
-our $VERSION = '1.45b';
+our $VERSION = '1.45';
 
 =head1 NAME
 
@@ -71,17 +69,13 @@ Copy $source_path into new linked path from $parent.
 =cut
 
 sub copy_to_linkpath {
-    #print "start copy_to_linkpath\n";
-    my ($self) = @_;
-    my $parentFile = $self->parent->target_path;
-
-    my $filter;
-    if (defined $_filter_module) {
-        $filter = $_filter_module->new($self);
-    }
-    else {
-        $filter = HTML::SiteTear::PageFilter->new($self);
-    }
+    my ($self) = shift @_;
+    my $filter = do {
+        if (defined $_filter_module) {
+            $_filter_module->new($self);
+        } else {
+            HTML::SiteTear::PageFilter->new($self);
+        }};
     
     my $source_path = $self->source_path;
     unless (-e $source_path) {
@@ -90,13 +84,12 @@ sub copy_to_linkpath {
     }
 
     unless ($self->exists_in_copied_files($source_path)){
-        my $target_path;
-        if (my $target_uri = $self->item_in_filemap($source_path)) {
-            $target_path = $target_uri->file;
-        } else {
-            $target_path = $self->link_uri->file;
-        }
-        
+        my $target_path = do {
+            if (my $target_uri = $self->item_in_filemap($source_path)) {
+                $target_uri->file;
+            } else {
+                $self->link_uri->file;
+            }};
         mkpath(dirname($target_path));
         my $io = IO::File->new("> $target_path") 
                                 or die "Can't open $target_path";

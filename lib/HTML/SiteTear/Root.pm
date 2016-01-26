@@ -16,7 +16,7 @@ __PACKAGE__->mk_accessors(qw(source_path
                              allow_abs_link
                              only_subitems));
 
-our $VERSION = '1.45b';
+our $VERSION = '1.45';
 
 =head1 NAME
 
