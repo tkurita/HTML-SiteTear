@@ -179,22 +179,39 @@ sub copy_to_dir {
     my $root = HTML::SiteTear::Root->new(%$self);
     my $source_root_uri = $root->source_root_uri;
     my $dest_uri = URI::file->new_abs($destination_path);
-    my @results;
-    foreach my $file (@{$self->member_files}) {
-        my $a_member_file = $file;
-        unless (File::Spec->file_name_is_absolute($a_member_file)) {
-            $a_member_file = URI::file->new($a_member_file)
-                                   ->abs($self->source_path)->file;
-        }
-        my $page = HTML::SiteTear::Page->new(
-                                            'parent' => $root,
-                                            'source_path' => $a_member_file);
+    my @results = map {
+        my $a_member_file = do {
+            if (File::Spec->file_name_is_absolute($_)) {
+                $_;
+            }else {
+                URI::file->new($_)
+                    ->abs($self->source_path)->file;
+            }};
+        my $page = HTML::SiteTear::Page->new('parent' => $root,
+                                             'source_path' => $a_member_file);
         my $rel_from_source_root = $page->source_uri->rel($source_root_uri);
         my $abs_from_dest = $rel_from_source_root->abs($dest_uri);
         $page->link_uri($abs_from_dest);
         $page->copy_to_linkpath;
-        push @results, $page;
-    }
+        $page;
+    } @{$self->member_files};
+        
+    # foreach my $file (@{$self->member_files}) {
+    #     my $a_member_file = $file;
+    #     unless (File::Spec->file_name_is_absolute($a_member_file)) {
+    #         $a_member_file = URI::file->new($a_member_file)
+    #                                ->abs($self->source_path)->file;
+    #     }
+    #     my $page = HTML::SiteTear::Page->new(
+    #                                         'parent' => $root,
+    #                                         'source_path' => $a_member_file);
+    #     my $rel_from_source_root = $page->source_uri->rel($source_root_uri);
+    #     my $abs_from_dest = $rel_from_source_root->abs($dest_uri);
+    #     $page->link_uri($abs_from_dest);
+    #     $page->copy_to_linkpath;
+    #     push @results, $page;
+    # }
+
     return \@results;
 }
 

@@ -87,12 +87,12 @@ sub copy_to_linkpath {
             return;
         }
         
-        my $target_path;
-        if (my $target_uri = $self->item_in_filemap($source_path)) {
-            $target_path = $target_uri->file;
-        } else {
-            $target_path = $self->link_uri->file
-        }
+        my $target_path = do {
+            if (my $target_uri = $self->item_in_filemap($source_path)) {
+                $target_uri->file;
+            } else {
+                $self->link_uri->file;
+            }};
 
         print "Copying asset...\n";
         print "from : $source_path\n";
@@ -101,7 +101,6 @@ sub copy_to_linkpath {
         mkpath(dirname($target_path));
         $self->target_path($target_path); #temporary set for css_copy
         $self->css_copy($target_path);
-        #$self->target_path(Cwd::abs_path($target_path));
         $self->add_to_copyied_files($source_path);
         $self->copy_linked_files;
     }
