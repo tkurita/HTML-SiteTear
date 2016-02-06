@@ -137,6 +137,11 @@ sub item_in_filemap {
     return $self->{'fileMapRef'}->{$path};
 }
 
+sub exists_in_target_files {
+    my ($self, $path) = @_;
+    return grep(/^$path$/, values %{$self->{fileMapRef}});
+}
+
 =head2 rel_for_mappedfile
 
     $root->rel_for_mappedfile($source_path, $base_uri);

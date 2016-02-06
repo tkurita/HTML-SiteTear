@@ -127,7 +127,7 @@ make a new link path from a link path($linkpath) in $source_path. $folder_name i
 =cut
 
 sub change_path {
-    #print STDERR "start change_path\n";
+    # print STDERR "start change_path\n";
     my ($self, $linkpath, $folder_name, $kind) = @_;
     my $result_path;
     
@@ -182,26 +182,39 @@ sub change_path {
                 $new_link_uri = $uri->rel($self->target_uri);
                 $should_copy = 0;
             } else {
-                my $file_name = basename($abs_path);
-                $new_link_uri = URI->new("$folder_name/$file_name");
+                my $filename = basename($abs_path);
+                $new_link_uri = URI->new("$folder_name/$filename");
             }
             
         } else { # when under sourceRoot, linpath is not changed.
             $new_link_uri = URI->new($linkpath);
         }
-        
-        $new_linked_obj->linkpath($result_path);
         my $target_uri = $new_link_uri->abs($self->target_uri);
+        if ($should_copy and $self->exists_in_target_files($target_uri)) {
+            #target file is already created. should change file name.
+            my @path_segments = $target_uri->path_segments;
+            my $filename = pop @path_segments;
+            my $suffix = '';
+            my $basename = do {
+                if ($filename =~ /(.+)(\.[^.]+$)/) {
+                    $suffix = $2;
+                    $1;
+                } else {
+                    $filename
+                }};
+            my $n = 1;
+            do {$target_uri->path_segments(@path_segments, $basename.($n++).$suffix);
+                } while ($self->exists_in_target_files($target_uri));
+            $new_link_uri = $target_uri->rel($self->target_uri);
+        }
         $new_linked_obj->link_uri($target_uri);
-        
         $self->add_to_linked_files($new_linked_obj) if $should_copy;
         $self->add_to_filemap($abs_path, $target_uri);
-        
         if ($fragment) {
             $new_link_uri->fragment($fragment);
         }
         $result_path = $new_link_uri->as_string;
-
+        $new_linked_obj->linkpath($result_path);        
     }
     #print "end of change_path\n";
     return $result_path
@@ -296,6 +309,11 @@ sub item_in_filemap {
     my ($self, $path) = @_;
     #return $self->parent->item_in_filemap($path);
     return $self->source_root->item_in_filemap($path);
+}
+
+sub exists_in_target_files {
+    my ($self, $path) = @_;
+    return $self->source_root->exists_in_target_files($path);
 }
 
 =head2 source_root_path
