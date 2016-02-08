@@ -1,4 +1,13 @@
 Revision history for Perl extension HTML::SiteTear.
+1.45 2016-02-08
+    * Fixed : collision of target filenames cause a former file is will be
+      overwrited by a later one.
+        * A file name of the later file will be renamed automatically to
+          avoid file name collision.
+    * Fixed error when a relative directtory path is given as a destination.
+    * Support enbed and param tags.
+    * Suppressed decoding entities in attribuites.
+    * Cleanup code.
 
 1.44 2009-05-17
     * fix an error when a relative directory path is give as a source.
