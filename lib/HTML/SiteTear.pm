@@ -3,9 +3,9 @@ package HTML::SiteTear;
 use 5.008;
 use strict;
 use warnings;
-use File::Basename;
+use File::Basename qw(basename);
 use File::Spec;
-use File::Path;
+use File::Path 2.0 qw(make_path);
 use File::Find;
 use Cwd;
 use Carp;
@@ -141,7 +141,7 @@ sub copy_to {
         }
     } else {
         my ($name, $dir) = fileparse($destination_path);
-        mkpath($dir);
+        make_path($dir);
         unless ($name) {
             $destination_path = File::Spec->catfile($dir,
                                                 basename($source_path));
@@ -195,23 +195,6 @@ sub copy_to_dir {
         $page->copy_to_linkpath;
         $page;
     } @{$self->member_files};
-        
-    # foreach my $file (@{$self->member_files}) {
-    #     my $a_member_file = $file;
-    #     unless (File::Spec->file_name_is_absolute($a_member_file)) {
-    #         $a_member_file = URI::file->new($a_member_file)
-    #                                ->abs($self->source_path)->file;
-    #     }
-    #     my $page = HTML::SiteTear::Page->new(
-    #                                         'parent' => $root,
-    #                                         'source_path' => $a_member_file);
-    #     my $rel_from_source_root = $page->source_uri->rel($source_root_uri);
-    #     my $abs_from_dest = $rel_from_source_root->abs($dest_uri);
-    #     $page->link_uri($abs_from_dest);
-    #     $page->copy_to_linkpath;
-    #     push @results, $page;
-    # }
-
     return \@results;
 }
 
