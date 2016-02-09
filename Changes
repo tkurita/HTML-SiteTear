@@ -4,8 +4,8 @@ Revision history for Perl extension HTML::SiteTear.
       overwrited by a later one.
         * A file name of the later file will be renamed automatically to
           avoid file name collision.
-    * Fixed error when a relative directtory path is given as a destination.
-    * Support enbed and param tags.
+    * Fixed error when a relative directory path is given as a destination.
+    * Support embed and param tags.
     * Suppressed decoding entities in attribuites.
     * Cleanup code.
 
