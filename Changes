@@ -1,4 +1,8 @@
 Revision history for Perl extension HTML::SiteTear.
+1.46 2016-02-10
+    * Fixed error when a path which does not exist passed to copy_to.
+    * Fixed typo in documents
+.
 1.45 2016-02-08
     * Fixed : collision of target filenames cause a former file is will be
       overwrited by a later one.
