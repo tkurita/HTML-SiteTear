@@ -3,7 +3,7 @@ package HTML::SiteTear;
 use 5.008;
 use strict;
 use warnings;
-use File::Basename qw(basename);
+use File::Basename qw(basename fileparse);
 use File::Spec;
 use File::Path 2.0 qw(make_path);
 use File::Find;
