@@ -10,7 +10,7 @@ use File::Path qw(mkpath);
 use URI::file;
 #use Data::Dumper;
 
-use base qw(Class::Accessor);
+use base qw(Class::Accessor::Fast);
 __PACKAGE__->mk_accessors(qw(linkpath
                             link_uri
                             source_path

@@ -10,7 +10,7 @@ use URI;
 
 use HTML::Parser 3.40;
 use HTML::HeadParser;
-use base qw(HTML::Parser Class::Accessor);
+use base qw(HTML::Parser Class::Accessor::Fast);
 __PACKAGE__->mk_accessors(qw(has_remote_base
                             page));
 
